@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import * as THREE from "three";
 
-export const useExplode = (group, { distance = 3, enableRotation = true }) => {
+export const useExplode = (group, { distance = 0, enableRotation = true }) => {
   useEffect(() => {
     const groupWorldPosition = new THREE.Vector3();
     group.current.getWorldPosition(groupWorldPosition);
@@ -40,7 +40,7 @@ export const useExplode = (group, { distance = 3, enableRotation = true }) => {
 
   useFrame(() => {
     group.current.children.forEach((mesh) => {
-      if (scrollData.offset < 0.0001) {
+      if (scrollData.offset < 0.0000) {
         if (mesh.name === "origin") {
           mesh.visible = true;
         } else {
