@@ -46,13 +46,13 @@
 
 .welcome-overlay {
   position: absolute;
-  bottom: 5rem;
+  bottom: clamp(90px, 26vh, 283px);
   left: 50%;
   transform: translate(-50%, 0);
   color: #fff;
   text-align: center;
   pointer-events: auto;
-  background: linear-gradient(135deg, 
+  background: linear-gradient(135deg,
     rgba(255, 105, 180, 0.95) 0%,
     rgba(157, 78, 221, 0.95) 25%,
     rgba(0, 212, 255, 0.95) 50%,
@@ -63,13 +63,13 @@
   padding: clamp(20px, 5vw, 50px) clamp(30px, 6vw, 30px);
   border-radius: clamp(15px, 3vw, 30px);
   border: clamp(2px, 0.5vw, 5px) solid #fff;
-  box-shadow: 
+  box-shadow:
     0 0 40px rgba(255, 215, 0, 0.8),
     0 0 80px rgba(255, 105, 180, 0.6),
     inset 0 0 40px rgba(255, 255, 255, 0.3);
   max-width: 90%;
   width: clamp(300px, 70%, 600px);
-  max-height: 80vh;
+  max-height: calc(80vh - 120px);
   overflow-y: auto;
 }
 
@@ -100,7 +100,7 @@
   background: rgba(255, 255, 255, 0.9);
   padding: clamp(12px, 3vw, 20px);
   border-radius: clamp(10px, 2vw, 15px);
-  margin: clamp(15px, 3vw, 25px) 0;
+  margin: clamp(15px, 1vw, 25px) 0;
   border: clamp(2px, 0.4vw, 3px) dashed #ff69b4;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
@@ -129,12 +129,30 @@
   gap: clamp(10px, 2vw, 20px);
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: clamp(20px, 4vw, 35px);
+  margin-top: clamp(20px, 2vw, 35px);
 }
 .button-container div {
   display: flex;
   gap: 1rem;
   width: 100%;
+}
+
+/* Button row for Penny Magic and Dexscreener */
+.button-row {
+  display: flex;
+  gap: clamp(10px, 2vw, 15px);
+  width: 100%;
+}
+
+.button-row .btn {
+  flex: 1;
+  min-width: 0;
+  padding: .5rem;
+}
+
+/* Hide social buttons in welcome overlay since they're now fixed at top */
+.button-container .social-buttons {
+  display: none;
 }
 
 .btn {
@@ -205,6 +223,29 @@
   box-shadow: 0 8px 30px rgba(0, 212, 255, 0.8);
 }
 
+.btn-penny-magic {
+  background: linear-gradient(45deg, #ff69b4, #ff1493, #ff69b4);
+  background-size: 200% 200%;
+  animation: gradient-slide 3s ease infinite;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.btn-penny-magic:hover {
+  transform: scale(1.1) rotate(-2deg);
+  box-shadow: 0 8px 30px rgba(255, 105, 180, 0.8);
+}
+
+.btn-icon {
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
 .btn-twitter {
   background: linear-gradient(45deg, #000000, #414141);
   color: #fff;
@@ -224,6 +265,29 @@
 .btn-twitter:hover {
   transform: scale(1.1) rotate(-2deg);
   box-shadow: 0 8px 30px rgba(32, 32, 32, 0.8);
+}
+
+/* Fixed social buttons in top right */
+.social-buttons-fixed {
+  position: fixed;
+  top: 20px;
+  right: 90px;
+  display: flex;
+  gap: 15px;
+  z-index: 1000;
+  animation: mute-entrance 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.social-buttons-fixed .btn-icon {
+  width: 60px;
+  height: 60px;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(255, 105, 180, 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 /* Stars decoration */
@@ -257,9 +321,9 @@
   }
 
   .welcome-overlay {
-    bottom: 5%;
+    bottom: clamp(90px, 26vh, 283px);
     width: 95%;
-    max-height: 85vh;
+    max-height: calc(85vh - 100px);
   }
 
   .button-container {
@@ -274,6 +338,14 @@
   .btn:hover {
     transform: scale(1.05);
   }
+
+  .fixed-footer {
+    padding: 12px 15px;
+  }
+
+  .footer-disclaimer {
+    padding: 8px 12px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -282,7 +354,8 @@
   }
 
   .welcome-overlay {
-    bottom: 2%;
+    bottom: clamp(90px, 26vh, 283px);
+    max-height: calc(88vh - 90px);
   }
 
   .welcome-title {
@@ -296,6 +369,19 @@
   .button-container {
     margin-top: 20px;
   }
+
+  .fixed-footer {
+    padding: 10px 12px;
+  }
+
+  .footer-text {
+    margin-bottom: 8px;
+  }
+
+  .footer-disclaimer {
+    padding: 6px 10px;
+    border-radius: 10px;
+  }
 }
 
 /* Landscape mobile */
@@ -306,9 +392,9 @@
   }
 
   .welcome-overlay {
-    bottom: 2%;
+    bottom: clamp(90px, 26vh, 283px);
     padding: 15px 25px;
-    max-height: 90vh;
+    max-height: calc(90vh - 80px);
   }
 
   .welcome-title {
@@ -324,6 +410,14 @@
   .button-container {
     margin-top: 15px;
     gap: 10px;
+  }
+
+  .fixed-footer {
+    padding: 8px 15px;
+  }
+
+  .footer-disclaimer {
+    padding: 5px 10px;
   }
 }
 
@@ -556,6 +650,26 @@
   .mute-icon {
     font-size: 24px;
   }
+
+  .social-buttons-fixed {
+    top: 15px;
+    right: 75px;
+    gap: 10px;
+  }
+
+  .social-buttons-fixed .btn-icon {
+    width: 50px;
+    height: 50px;
+  }
+  .button-row .btn {
+   font-size: .75rem;
+}
+
+
+  .social-buttons-fixed .btn-icon svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -569,19 +683,114 @@
   .mute-icon {
     font-size: 20px;
   }
+
+  .social-buttons-fixed {
+    top: 10px;
+    right: 65px;
+    gap: 8px;
+  }
+
+  .social-buttons-fixed .btn-icon {
+    width: 45px;
+    height: 45px;
+  }
+
+  .social-buttons-fixed .btn-icon svg {
+    width: 18px;
+    height: 18px;
+  }
 }
 
-/* Accessibility - Reduce motion */
-@media (prefers-reduced-motion: reduce) {
-  .mute-button {
-    animation: none;
-  }
-  
-  .mute-icon {
-    animation: none;
-  }
-  
-  .mute-button:hover {
-    transform: scale(1.1);
-  }
+/* Fixed Footer */
+.fixed-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(135deg, rgb(255 105 180 / 26%) 0%, rgb(157 78 221 / 66%) 50%, rgb(0 212 255 / 16%) 100%);
+  backdrop-filter: blur(10px);
+  border-top: 3px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 -4px 20px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(255, 105, 180, 0.4),
+    inset 0 2px 20px rgba(255, 255, 255, 0.2);
+  z-index: 900;
+  padding: clamp(15px, 3vw, 25px) clamp(20px, 4vw, 40px);
+  font-family: 'Fredoka', cursive;
 }
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-text {
+  margin: 0 0 clamp(10px, 2vw, 15px) 0;
+  font-size: clamp(11px, 2vw, 14px);
+  color: white;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.footer-text strong {
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow:
+    2px 2px 0px rgba(0, 0, 0, 0.3),
+    0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.footer-disclaimer {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
+  border-radius: 15px;
+  padding: clamp(10px, 2vw, 15px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.disclaimer-title {
+  margin: 0 0 clamp(5px, 1vw, 8px) 0;
+  font-size: clamp(12px, 2.2vw, 15px);
+  color: #ffd700;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow:
+    2px 2px 0px rgba(0, 0, 0, 0.3),
+    0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.disclaimer-text {
+  margin: 0;
+  font-size: clamp(10px, 1.8vw, 13px);
+  color: white;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Try Your Luck Button */
+.btn-try-luck {
+  background: linear-gradient(45deg, #ffd700, #ff69b4, #00d4ff, #9d4edd, #ffd700);
+  background-size: 300% 300%;
+  animation: gradient-slide 4s ease infinite, pulse-glow 2s ease-in-out infinite;
+  color: #fff;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+  font-size: clamp(16px, 3vw, 24px);
+  border: 3px solid #fff;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+}
+
+.btn-try-luck:hover {
+  transform: scale(1.15) rotate(-2deg);
+  box-shadow: 0 0 50px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 105, 180, 0.8);
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+  50% { box-shadow: 0 0 50px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 105, 180, 0.8); }
+}
+
+ 

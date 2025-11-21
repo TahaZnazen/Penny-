@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Loader.css';
+import { FaTelegram } from "react-icons/fa";
+import { PiXLogoBold } from "react-icons/pi";
 
 export function LoadingScreen({ isLoading, onStart, assetsLoaded, isTransitioning }) {
   const [showButton, setShowButton] = useState(false);
@@ -28,8 +30,30 @@ export function LoadingScreen({ isLoading, onStart, assetsLoaded, isTransitionin
 
   return (
     <div className={`loading-screen ${assetsLoaded ? 'ready' : ''} ${isTransitioning ? 'transitioning' : ''}`}>
-        {/* Mute Button - Only show after started */}
-  
+      {/* Social Buttons on Loading Screen */}
+      <div className="social-buttons-fixed">
+        <button
+          className="btn btn-icon btn-telegram"
+          onClick={() =>
+            window.open(
+              "https://web.telegram.org/k/#@PennySOLLL",
+              "_blank"
+            )
+          }
+          aria-label="Telegram"
+        >
+          <FaTelegram size={24} />
+        </button>
+
+        <button
+          className="btn btn-icon btn-twitter"
+          onClick={() => window.open("https://x.com/PennySOLL", "_blank")}
+          aria-label="Twitter"
+        >
+          <PiXLogoBold size={24} />
+        </button>
+      </div>
+
       {/* Transition overlay effects */}
       {isTransitioning && (
         <>
@@ -161,6 +185,17 @@ export function LoadingScreen({ isLoading, onStart, assetsLoaded, isTransitionin
       <div className="corner-decoration corner-top-right">🌟</div>
       <div className="corner-decoration corner-bottom-left">💎</div>
       <div className="corner-decoration corner-bottom-right">💎</div>
+
+      {/* Fixed Footer */}
+      <footer className="fixed-footer">
+        <div className="footer-content">
+  
+             <p className="disclaimer-title">Disclaimer:</p>
+            <p className="disclaimer-text">
+              Penny ($PENNY) is a community-driven memecoin with no intrinsic value or expected returns. Always DYOR.
+            </p>
+         </div>
+      </footer>
     </div>
   );
 }

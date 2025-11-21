@@ -80,6 +80,7 @@
   position: relative;
   z-index: 1;
   max-width: 90%;
+  padding-bottom: clamp(100px, 20vh, 150px);
 }
 
 /* Top Decoration */
@@ -650,9 +651,14 @@
     padding: 12px 20px;
   }
 
+  .loading-content {
+    padding-bottom: clamp(120px, 22vh, 180px);
+  }
+
   .start-button {
     padding: 18px 40px;
     width: 90%;
+    margin-bottom: 20px;
   }
 
   .button-text {
@@ -672,6 +678,14 @@
 
   .corner-decoration {
     font-size: 30px;
+  }
+
+  .loading-content {
+    padding-bottom: clamp(130px, 25vh, 200px);
+  }
+
+  .start-button {
+    margin-bottom: 30px;
   }
 
   .loading-spinner {
