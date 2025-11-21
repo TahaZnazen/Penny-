@@ -145,9 +145,9 @@ const SlotGame = () => {
   return (
     <>
       {/* Title Bar */}
-      <div className="screen-header">
+      {/* <div className="screen-header">
         <span className="screen-title">PENNY SLOTS</span>
-      </div>
+      </div> */}
 
       {/* Reels Display */}
       <div className="reels-container">
@@ -180,14 +180,14 @@ const SlotGame = () => {
       </div>
 
       {/* Result Display */}
-      {result && (
+      {/* {result && (
         <div className={`result-display ${result.type}`}>
           <div className="result-text">{result.message}</div>
         </div>
-      )}
+      )} */}
 
       {/* Control Panel */}
-      <div className="control-panel">
+      {/* <div className="control-panel">
         <button
           onClick={spin}
           disabled={spinning}
@@ -195,7 +195,7 @@ const SlotGame = () => {
         >
           {spinning ? 'SPINNING...' : 'SPIN'}
         </button>
-      </div>
+      </div> */}
     </>
   );
 };

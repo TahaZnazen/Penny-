@@ -35,3 +35,9 @@
   border-color: rgba(255, 255, 255, 0.5);
   transform: translateX(-3px);
 }
+
+/* Screen wrapper - force behind canvas */
+.screen-wrapper {
+  z-index: -1 !important;
+  pointer-events: auto !important;
+}
