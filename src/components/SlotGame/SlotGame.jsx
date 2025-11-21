@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import './SlotGame.css';
 
-const SlotGame = () => {
+const SlotGame = ({ autoStart = false }) => {
   // Define symbols with images and weights (higher weight = more common)
   // Weight examples: 1 = very rare, 10 = common, 20 = very common
   const SYMBOLS = [
-    { id: 'penny', src: '/imgs/penny.png', alt: 'Penny', weight: 400 },        // JACKPOT - VERY RARE
+    { id: 'penny', src: '/imgs/penny.png', alt: 'Penny', weight: 1 },        // JACKPOT - VERY RARE
     { id: 'ass', src: '/imgs/ass.png', alt: 'ass', weight: 12 },
     { id: 'cool', src: '/imgs/cool.png', alt: 'cool', weight: 12 },
     { id: 'pepe', src: '/imgs/pepe.png', alt: 'pepe', weight: 12 },
@@ -13,7 +13,7 @@ const SlotGame = () => {
     { id: 'spit', src: '/imgs/spit.png', alt: 'spit', weight: 12 },
     { id: 'trump', src: '/imgs/trump.png', alt: 'trump', weight: 12 },
     { id: 'viking', src: '/imgs/viking.png', alt: 'viking', weight: 12 },
-    { id: 'hammer', src: '/imgs/hammer.png', alt: 'hammer', weight: 12 },
+    { id: 'cill', src: '/imgs/chill.png', alt: 'cill', weight: 12 },
   ];
 
   const JACKPOT_SYMBOL = 'penny'; // Only 5 pennies win the jackpot
@@ -50,6 +50,17 @@ const SlotGame = () => {
   useEffect(() => {
     reelRefs.current = reelRefs.current.slice(0, REEL_COUNT);
   }, []);
+
+  // Auto-start spin if autoStart prop is true
+  useEffect(() => {
+    if (autoStart) {
+      const timer = setTimeout(() => {
+        spin();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart]);
 
   const spin = () => {
     if (spinning) return;

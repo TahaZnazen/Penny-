@@ -1,6 +1,7 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Html } from '@react-three/drei';
+import { OrbitControls, Html, Environment, ContactShadows } from '@react-three/drei';
 import { useControls } from 'leva';
 import { Model } from '../SlotMachineModel';
 import TVScreen from '../TVScreen';
@@ -9,25 +10,17 @@ import './SlotMachine.css';
 
 // Screen Component - Embeds HTML SlotGame in 3D space
 const ScreenInGap = () => {
-  // const {
-  //   screenX,
-  //   screenY,
-  //   screenZ,
-  //   screenScale,
-  //   screenRotationY
-  // } = useControls('Screen Position', {
-  //   screenX: { value: 0, min: -5, max: 5, step: 0.01, label: 'Screen X' },
-  //   screenY: { value: 0, min: -5, max: 5, step: 0.01, label: 'Screen Y' },
-  //   screenZ: { value: 0, min: -5, max: 5, step: 0.01, label: 'Screen Z' },
-  //   screenScale: { value: 0.35, min: 0.01, max: 2, step: 0.01, label: 'Scale' },
-  //   screenRotationY: { value: 0, min: -Math.PI, max: Math.PI, step: 0.01, label: 'Rotation Y' },
-  // });
+  const [gameStarted, setGameStarted] = React.useState(false);
+
+  const handleStartGame = () => {
+    setGameStarted(true);
+  };
 
   return (
     <group
-      position={[0, 0, 0]}
+      position={[0, 0, -0.2]}
       rotation={[0, 0, 0]}
-      scale={0.7 }
+      scale={0.7}
     >
       <Html
         transform
@@ -35,39 +28,77 @@ const ScreenInGap = () => {
         position={[0, 0.07, 0]}
         distanceFactor={1}
         style={{
-          width: '1550px',
-          height: '800px',
+          width: '1600px',
+          height: '850px',
           pointerEvents: 'auto',
         }}
-        wrapperClass="screen-wrapper"
       >
-        <TVScreen>
-          <SlotGame />
-        </TVScreen>
+        {!gameStarted ? (
+          // Step 1: Show big SPIN button
+          <div className="start-screen">
+            <button className="big-spin-button" onClick={handleStartGame}>
+              SPIN
+            </button>
+          </div>
+        ) : (
+          // Step 2: Show game and auto-start spinning
+          <TVScreen>
+            <SlotGame autoStart={true} />
+          </TVScreen>
+        )}
       </Html>
     </group>
   );
 };
 
 const SlotMachineScene = () => {
+ 
+ 
+
   return (
     <>
       {/* Lighting */}
       <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
-      <pointLight position={[-10, -10, -5]} intensity={0.5} />
+      <directionalLight
+        position={[10, 10, 5]}
+        intensity={1}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={50}
+        shadow-camera-left={-10}
+        shadow-camera-right={10}
+        shadow-camera-top={10}
+        shadow-camera-bottom={-10}
+      />
+      <pointLight position={[-10, -10, -6]} intensity={1} />
 
-      {/* Slot Machine Model */}
-
+      {/* Ground plane to receive shadows */}
+         <mesh
+          rotation={[-Math.PI / 2, 0, 1]}
+          position={[0, -0.8, 0]}
+          receiveShadow
+        >
+          <planeGeometry args={[25, 50]} />
+          <shadowMaterial opacity={0.2} />
+        </mesh>
+ 
+ 
 
       {/* Screen with SlotGame embedded in 3D space */}
-    
       <ScreenInGap />
+
+      {/* Slot Machine Model */}
       <Model
         position={[0, 0, 2.5]}
         scale={1}
         rotation={[0.2, 0, 0]}
+        castShadow
+        receiveShadow
       />
+
+ 
+
       {/* Camera Controls - Disabled zoom and rotation */}
       <OrbitControls
         enableZoom={false}
@@ -92,6 +123,7 @@ const SlotMachine = () => {
 
       {/* 3D Slot Machine Model with integrated screen */}
       <Canvas
+        shadows
         camera={{ position: [0, 0, 5], fov: 50 }}
         style={{ width: '100%', height: '100%' }}
       >
