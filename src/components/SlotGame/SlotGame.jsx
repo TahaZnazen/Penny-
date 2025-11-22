@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import './SlotGame.css';
 
-const SlotGame = ({ autoStart = false }) => {
+const SlotGame = ({ autoStart = false, onJackpot }) => {
   // Define symbols with images and weights (higher weight = more common)
   // Weight examples: 1 = very rare, 10 = common, 20 = very common
   const SYMBOLS = [
-    { id: 'penny', src: '/imgs/penny.png', alt: 'Penny', weight: 1 },        // JACKPOT - VERY RARE
+    { id: 'penny', src: '/imgs/penny.png', alt: 'Penny', weight: 5},        // JACKPOT - VERY RARE
     { id: 'ass', src: '/imgs/ass.png', alt: 'ass', weight: 12 },
     { id: 'cool', src: '/imgs/cool.png', alt: 'cool', weight: 12 },
     { id: 'pepe', src: '/imgs/pepe.png', alt: 'pepe', weight: 12 },
@@ -146,7 +146,13 @@ const SlotGame = ({ autoStart = false }) => {
 
     if (allPennies) {
       // ALL 5 PENNIES - JACKPOT!
+      console.log('🎰 JACKPOT! Triggering explosion!');
       setResult({ type: 'jackpot', message: '🎊 JACKPOT! 5 Pennies! 🎊', symbols: middleSymbols });
+
+      // Trigger explosion animation on the 3D model
+      if (onJackpot) {
+        onJackpot();
+      }
     } else {
       // Anything else is a loss
       setResult({ type: 'lose', message: 'Try Again!', symbols: middleSymbols });

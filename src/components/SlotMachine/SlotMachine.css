@@ -2,17 +2,18 @@
 .slot-machine-container {
   width: 100vw;
   height: 100vh;
-  background-image: url('/textures/bg.png');
+  /* background-image: url('/textures/bg.png'); */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: fixed;
+  position: relative; /* Changed from fixed to relative for embedded mode */
   top: 0;
   left: 0;
   overflow: hidden;
+  background-color: pink;
 }
 
 /* Back Button */
@@ -30,7 +31,8 @@
   cursor: pointer;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
-  z-index: 1000;
+  z-index: 99999; /* Increased z-index to ensure it's always clickable */
+  pointer-events: auto; /* Ensure pointer events work */
 }
 
 .back-home-button:hover {
@@ -50,14 +52,15 @@
   width: 100%;
   height: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  background-image: url('/textures/bg.png');
-  background-size: cover;
+  background-image: url('/textures/game2.png');
+  background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
   border-radius: 10px;
   box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
+  padding-bottom: 5rem;
 }
 
 /* Big SPIN Button */
@@ -65,7 +68,7 @@
   background: linear-gradient(145deg, #ff6b6b, #ee5a52);
   color: white;
   border: none;
-  padding: 60px 120px;
+  padding: 1rem 6rem;
   font-size: 5rem;
   font-weight: bold;
   border-radius: 30px;
@@ -88,8 +91,8 @@
   position: absolute;
   top: -50%;
   left: -50%;
-  width: 200%;
-  height: 200%;
+  width: 300%;
+  height: 300%;
   background: linear-gradient(
     45deg,
     transparent,

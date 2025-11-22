@@ -1,46 +1,16 @@
 import { Canvas } from "@react-three/fiber";
 import { Experience } from "./Experience";
-import { useState, useEffect } from "react";
-import { LoadingScreen } from "./loader/LoadingScreen";
-import { useProgress, Preload } from "@react-three/drei";
+import { useState } from "react";
+import { Preload } from "@react-three/drei";
 import { audioManager } from "../utils/audioManager";
 import { FaTelegram } from "react-icons/fa";
 import { PiXLogoBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 
-function AssetsTracker({ onReady }) {
-  const { active, progress } = useProgress();
-
-  useEffect(() => {
-    if (!active && progress === 100) {
-      onReady();
-    }
-  }, [active, progress, onReady]);
-
-  return null;
-}
-
 function Home() {
   const navigate = useNavigate();
   const [isBroken, setIsbroken] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
-  const [assetsLoaded, setAssetsLoaded] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-
-  const handleStart = () => {
-    audioManager.playChill();
-    setIsTransitioning(true);
-
-    setTimeout(() => {
-      setHasStarted(true);
-      setIsTransitioning(false);
-    }, 1500);
-  };
-
-  const handleAssetsReady = () => {
-    setAssetsLoaded(true);
-  };
 
   const toggleMute = () => {
     const newMutedState = !isMuted;
@@ -54,17 +24,15 @@ function Home() {
 
   return (
     <div className="container">
-      {/* Mute Button - Only show after started */}
-      {hasStarted && (
-        <button
-          className="mute-button"
-          onClick={toggleMute}
-          aria-label={isMuted ? "Unmute sound" : "Mute sound"}
-        >
-          <span className="mute-icon">{isMuted ? "🔇" : "🔊"}</span>
-          <span className="mute-ripple"></span>
-        </button>
-      )}
+      {/* Mute Button */}
+      <button
+        className="mute-button"
+        onClick={toggleMute}
+        aria-label={isMuted ? "Unmute sound" : "Mute sound"}
+      >
+        <span className="mute-icon">{isMuted ? "🔇" : "🔊"}</span>
+        <span className="mute-ripple"></span>
+      </button>
 
       {/* Social Buttons - Always visible */}
       <div className="social-buttons-fixed">
@@ -90,28 +58,20 @@ function Home() {
         </button>
       </div>
 
-      <LoadingScreen
-        isLoading={!hasStarted}
-        onStart={handleStart}
-        assetsLoaded={assetsLoaded}
-        isTransitioning={isTransitioning}
-      />
-
-      {/* Canvas always renders for asset loading */}
+      {/* Canvas */}
       <Canvas shadows camera={{ position: [4, 1, 4], fov: 35 }}>
         <Experience setIsbroken={setIsbroken} />
         <Preload all />
-        <AssetsTracker onReady={handleAssetsReady} />
       </Canvas>
 
-      {/* UI Overlays - only show after started */}
-      {hasStarted && !isBroken && (
+      {/* UI Overlays */}
+      {!isBroken && (
         <div className="click-message animate-in">
           Click to Break <br /> the Piggy Bank!
         </div>
       )}
 
-      {hasStarted && isBroken && (
+      {isBroken && (
         <div className="welcome-overlay animate-in">
           <h1 className="welcome-title">Welcome To Penny!</h1>
 

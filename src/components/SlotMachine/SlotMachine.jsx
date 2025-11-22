@@ -1,15 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Html, Environment, ContactShadows } from '@react-three/drei';
-import { useControls } from 'leva';
+import { OrbitControls, Html } from '@react-three/drei';
 import { Model } from '../SlotMachineModel';
-import TVScreen from '../TVScreen';
-import SlotGame from '../SlotGame';
+import TVScreen from '../TVScreen/TVScreen';
+import SlotGame from '../SlotGame/SlotGame';
+import JackpotScreen from '../JackpotScreen/JackpotScreen';
 import './SlotMachine.css';
 
 // Screen Component - Embeds HTML SlotGame in 3D space
-const ScreenInGap = () => {
+const ScreenInGap = ({ onJackpot }) => {
   const [gameStarted, setGameStarted] = React.useState(false);
 
   const handleStartGame = () => {
@@ -43,7 +43,7 @@ const ScreenInGap = () => {
         ) : (
           // Step 2: Show game and auto-start spinning
           <TVScreen>
-            <SlotGame autoStart={true} />
+            <SlotGame autoStart={true} onJackpot={onJackpot} />
           </TVScreen>
         )}
       </Html>
@@ -51,9 +51,29 @@ const ScreenInGap = () => {
   );
 };
 
-const SlotMachineScene = () => {
- 
- 
+const SlotMachineScene = ({ onJackpot }) => {
+  const modelRef = React.useRef();
+  const [jackpotTriggered, setJackpotTriggered] = React.useState(false);
+  const [showScreen, setShowScreen] = React.useState(true);
+
+  // Trigger explosion when jackpot happens
+  React.useEffect(() => {
+    if (jackpotTriggered && modelRef.current) {
+      console.log('🎰 JACKPOT! Triggering explosion...');
+      modelRef.current.explode();
+      setShowScreen(false); // Hide TV screen during explosion
+    }
+  }, [jackpotTriggered]);
+
+  const handleJackpot = () => {
+    console.log('🎊 Jackpot detected in scene!');
+    setJackpotTriggered(true);
+
+    // Trigger parent jackpot screen
+    if (onJackpot) {
+      onJackpot();
+    }
+  };
 
   return (
     <>
@@ -74,30 +94,27 @@ const SlotMachineScene = () => {
       <pointLight position={[-10, -10, -6]} intensity={1} />
 
       {/* Ground plane to receive shadows */}
-         <mesh
-          rotation={[-Math.PI / 2, 0, 1]}
-          position={[0, -0.8, 0]}
-          receiveShadow
-        >
-          <planeGeometry args={[25, 50]} />
-          <shadowMaterial opacity={0.2} />
-        </mesh>
- 
- 
+      <mesh
+        rotation={[-Math.PI / 2, 0, 1]}
+        position={[0, -0.8, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[25, 50]} />
+        <shadowMaterial opacity={0.2} />
+      </mesh>
 
-      {/* Screen with SlotGame embedded in 3D space */}
-      <ScreenInGap />
+      {/* Screen with SlotGame embedded in 3D space - hidden during explosion */}
+      {showScreen && <ScreenInGap onJackpot={handleJackpot} />}
 
-      {/* Slot Machine Model */}
+      {/* Slot Machine Model with explosion capability */}
       <Model
+        ref={modelRef}
         position={[0, 0, 2.5]}
         scale={1}
         rotation={[0.2, 0, 0]}
         castShadow
         receiveShadow
       />
-
- 
 
       {/* Camera Controls - Disabled zoom and rotation */}
       <OrbitControls
@@ -109,17 +126,46 @@ const SlotMachineScene = () => {
   );
 };
 
-const SlotMachine = () => {
+const SlotMachine = ({ isEmbedded = false }) => {
   const navigate = useNavigate();
+  const [showJackpotScreen, setShowJackpotScreen] = React.useState(false);
+
+  const handleJackpot = () => {
+    setShowJackpotScreen(true);
+
+    // Hide jackpot screen after 4 seconds
+    // setTimeout(() => {
+    //   setShowJackpotScreen(false);
+    // }, 4000);
+  };
+
+  const handleBackClick = () => {
+    console.log('Back button clicked! isEmbedded:', isEmbedded);
+    if (isEmbedded) {
+      // Scroll to top when embedded in Home page
+      console.log('Scrolling to top...');
+      // Try multiple scroll methods to ensure it works
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    } else {
+      // Navigate to home when standalone
+      console.log('Navigating to home...');
+      navigate('/');
+    }
+  };
 
   return (
     <div className="slot-machine-container">
       <button
         className="back-home-button"
-        onClick={() => navigate('/')}
+        onClick={handleBackClick}
       >
-        ← Back
+        {isEmbedded ? '↑ Back to Top' : '← Back'}
       </button>
+
+      {/* Jackpot Win Screen Overlay */}
+      <JackpotScreen show={showJackpotScreen} />
 
       {/* 3D Slot Machine Model with integrated screen */}
       <Canvas
@@ -127,11 +173,8 @@ const SlotMachine = () => {
         camera={{ position: [0, 0, 5], fov: 50 }}
         style={{ width: '100%', height: '100%' }}
       >
-        <SlotMachineScene />
+        <SlotMachineScene onJackpot={handleJackpot} />
       </Canvas>
-          {/* <TVScreen>
-          <SlotGame />
-        </TVScreen> */}
     </div>
   );
 };
