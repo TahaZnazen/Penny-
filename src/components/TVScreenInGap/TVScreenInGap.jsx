@@ -26,7 +26,6 @@ const TVScreenInGap = ({ onJackpot }) => {
       position={[0, 0, -0.2]}
       rotation={[0, 0, 0]}
       scale={0.7}
-      
     >
       <Html
         transform

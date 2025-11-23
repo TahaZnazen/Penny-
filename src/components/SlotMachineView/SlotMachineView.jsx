@@ -18,36 +18,30 @@ const SlotMachineScene = ({ onJackpot, introComplete }) => {
   const [jackpotTriggered, setJackpotTriggered] = React.useState(false);
   const [showScreen, setShowScreen] = React.useState(true);
 
-  // Intro animation - machine and screen slide up from bottom with scale
+  // Intro animation - machine and screen slide up from bottom (pure translation, no scale)
   useFrame((state) => {
     if (!introComplete) {
       const elapsed = state.clock.elapsedTime;
 
       if (groupRef.current) {
         if (elapsed < 2) {
-          // Everything slides up from bottom with easing
+          // Pure slide up - no scaling, perfect synchronization
           const progress = Math.min(elapsed / 2, 1);
           const eased = 1 - Math.pow(1 - progress, 3); // Ease out cubic
 
           // Start below viewport and slide up to neutral position
-          const startY = -8;
+          const startY = -10;
           const endY = 0;
           groupRef.current.position.set(0, startY + (endY - startY) * eased, 0);
-
-          // Scale from 0.5 to 1 - reduces perspective distortion, feels more unified
-          const scale = 0.5 + (0.5 * eased);
-          groupRef.current.scale.setScalar(scale);
         } else {
           // Reset to neutral
           groupRef.current.position.set(0, 0, 0);
-          groupRef.current.scale.set(1, 1, 1);
         }
       }
     } else {
       // Animation complete - ensure group is neutral
       if (groupRef.current) {
         groupRef.current.position.set(0, 0, 0);
-        groupRef.current.scale.set(1, 1, 1);
       }
     }
   });
@@ -111,7 +105,7 @@ const SlotMachineScene = ({ onJackpot, introComplete }) => {
       <AmbientParticles />
 
       {/* Animated group for machine and screen - they fly in together */}
-      <group ref={groupRef}>
+      <group ref={groupRef} position={[0 , 0 ,0]}>
         {/* Slot Machine Model with explosion capability */}
         <Model
           ref={modelRef}
