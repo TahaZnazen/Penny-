@@ -2,7 +2,7 @@
 .slot-machine-container {
   width: 100vw;
   height: 100vh;
-  /* background-image: url('/textures/bg.png'); */
+  /* background-image: url('/textures/bg0.png'); */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -13,7 +13,7 @@
   top: 0;
   left: 0;
   overflow: hidden;
-  background-color: #0a0a1a; /* Dark fallback color */
+  background-color: #0a0805; /* Dark fallback color */
 }
 
 /* Back Button */

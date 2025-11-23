@@ -31,7 +31,7 @@ const SlotMachine = ({ isEmbedded = false }) => {
         {isEmbedded ? '↑ Back to Top' : '← Back'}
       </button>
 
-      <AnimatedBackground />
+      {/* <AnimatedBackground /> */}
       <SlotMachineView />
     </div>
   );

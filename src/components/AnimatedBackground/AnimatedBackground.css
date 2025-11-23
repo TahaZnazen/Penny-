@@ -29,8 +29,8 @@
   bottom: 0;
   background: radial-gradient(
     circle at center,
-    rgba(26, 10, 46, 0.3) 0%,
-    rgba(26, 10, 46, 0.8) 100%
+    rgba(20, 12, 5, 0.1) 0%,
+    rgba(20, 12, 5, 0.4) 100%
   );
   z-index: 1;
   pointer-events: none;

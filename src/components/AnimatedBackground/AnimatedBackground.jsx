@@ -101,8 +101,9 @@ const PortalCloudShader = {
       // Vortex effect - stronger swirl near center
       float vortexMask = smoothstep(0.6, 0.0, dist);
 
-      // Combine effects
-      float cloudMask = combinedNoise * 0.5 + 0.5;
+      // Combine effects with sharper definition
+      float cloudMask = combinedNoise * 0.6 + 0.4;
+      cloudMask = pow(cloudMask, 0.8); // Sharpen the contrast
       cloudMask *= radialGradient;
 
       // Color mixing based on distance from center
@@ -110,12 +111,12 @@ const PortalCloudShader = {
       vec3 brightColor = mix(color3, color4, vortexMask);
       vec3 finalColor = mix(darkColor, brightColor, radialGradient * intensity);
 
-      // Add glow in center
-      float glow = pow(1.0 - dist, 3.0) * intensity;
-      finalColor += color4 * glow * 0.5;
+      // Add glow in center with more definition
+      float glow = pow(1.0 - dist, 2.5) * intensity;
+      finalColor += color4 * glow * 0.6;
 
-      // Fade out edges completely
-      float edgeFade = smoothstep(0.9, 0.5, dist);
+      // Less aggressive edge fade for clearer edges
+      float edgeFade = smoothstep(0.95, 0.4, dist);
 
       gl_FragColor = vec4(finalColor, cloudMask * edgeFade);
     }
