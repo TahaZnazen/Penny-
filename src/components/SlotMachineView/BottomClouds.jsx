@@ -1,30 +1,28 @@
 import React from 'react';
 import { Cloud } from '@react-three/drei';
-import { useControls } from 'leva';
 
 const BottomClouds = () => {
-  // Leva GUI controls
-  const controls = useControls('Bottom Clouds', {
-    count: { value: 45, min: 5, max: 100, step: 1, label: 'Cloud Count' },
-    radius: { value: 5.0, min: 1, max: 10, step: 0.1, label: 'Spread Radius' },
-    yPosition: { value: -24.1, min: -50, max: 1, step: 0.1, label: 'Y Position' },
-    yRange: { value: 3.9, min: 0.1, max: 10, step: 0.1, label: 'Y Spread' },
-    zPosition: { value: -31.0, min: -50, max: 50, step: 0.1, label: 'Z Position' },
-    segments: { value: 80, min: 10, max: 120, step: 5, label: 'Cloud Segments (Fluffiness)' },
-    boundsX: { value: 8.0, min: 0.5, max: 15, step: 0.1, label: 'Cloud Width' },
-    boundsY: { value: 3.0, min: 0.2, max: 10, step: 0.1, label: 'Cloud Height' },
-    boundsZ: { value: 9.0, min: 0.5, max: 15, step: 0.1, label: 'Cloud Depth' },
-    volume: { value: 12.0, min: 1, max: 20, step: 0.5, label: 'Cloud Volume (Thickness)' },
-    opacity: { value: 0.65, min: 0.1, max: 1, step: 0.05, label: 'Cloud Opacity' },
-    speed: { value: 0.50, min: 0, max: 1, step: 0.05, label: 'Drift Speed' },
-    growth: { value: 1.0, min: 0, max: 10, step: 0.5, label: 'Growth Animation' },
-    fade: { value: 21, min: 5, max: 50, step: 1, label: 'Fade Distance' },
-    goldenRatio: { value: 0.5, min: 0, max: 1, step: 0.1, label: 'Golden Ratio (0=white, 1=gold)' },
-    whiteColor: { value: '#ffffff', label: 'White Cloud Color' },
-    goldenColor: { value: '#ff8800', label: 'Golden Cloud Color' },
-    scale: { value: 2, min: -50, max: 30, step: 1, label: 'scale' },
-
-  });
+  // Hardcoded configuration
+  const controls = {
+    count: 45,
+    radius: 5.0,
+    yPosition: -24.1,
+    yRange: 3.9,
+    zPosition: -31.0,
+    segments: 80,
+    boundsX: 8.0,
+    boundsY: 3.0,
+    boundsZ: 9.0,
+    volume: 12.0,
+    opacity: 0.65,
+    speed: 0.50,
+    growth: 1.0,
+    fade: 21,
+    goldenRatio: 0.5,
+    whiteColor: '#ffffff',
+    goldenColor: '#ff8800',
+    scale: 2,
+  };
 
   // Create array of cloud configurations
   const clouds = React.useMemo(() => {
