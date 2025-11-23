@@ -7,6 +7,16 @@
   height: 100%;
   z-index: 0;
   pointer-events: none; /* Allow clicks to pass through to main scene */
+  animation: bgFadeIn 1.5s ease-in;
+}
+
+@keyframes bgFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Optional: Add a gradient overlay for extra depth */
