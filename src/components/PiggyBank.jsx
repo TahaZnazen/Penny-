@@ -99,8 +99,17 @@ useGLTF.preload("/models/piggybank.glb");
 // Main PiggyBank component with all pieces
 export const PiggyBank = (props) => {
   const { nodes, materials } = useGLTF("/models/piggybank.glb");
-  const [brokenPieces, setBrokenPieces] = useState(new Set());
-  const [autoShatter, setAutoShatter] = useState(false);
+  const { initialBroken = false } = props;
+
+  // Initialize broken state from localStorage
+  const [brokenPieces, setBrokenPieces] = useState(() => {
+    if (initialBroken) {
+      // If already broken, create a Set with all piece indices
+      return new Set(Array.from({ length: 104 }, (_, i) => i));
+    }
+    return new Set();
+  });
+  const [autoShatter, setAutoShatter] = useState(initialBroken);
   const groupRef = useRef();
   const shatterTimerRef = useRef(null);
 
@@ -244,10 +253,17 @@ export const PiggyBank = (props) => {
   };
 
   useEffect(() => {
-    if (effectiveBreakPercentage >= 0.21) {
+    if (effectiveBreakPercentage >= 0.21 && !initialBroken) {
       props?.setIsbroken(true);
     }
-  }, [effectiveBreakPercentage]);
+  }, [effectiveBreakPercentage, initialBroken]);
+
+  // Notify parent component immediately if initially broken
+  useEffect(() => {
+    if (initialBroken && props?.setIsbroken) {
+      props.setIsbroken(true);
+    }
+  }, [initialBroken]);
 
   useEffect(() => {
     // Model is loaded

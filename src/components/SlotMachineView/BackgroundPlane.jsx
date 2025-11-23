@@ -8,8 +8,8 @@ const BackgroundPlane = () => {
 
   // Hardcoded values
   const config = {
-    width: 42,
-    height: 22,
+    width: 50,
+    height: 25,
     positionX: 2.0,
     positionY: 0.0,
     positionZ: -30.1,
