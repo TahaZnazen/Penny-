@@ -4,6 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { useProgress, Preload } from "@react-three/drei";
 import Home from "./components/Home";
 import SlotMachine from "./components/SlotMachine";
+import ThunderEffect from "./components/ThunderEffect/ThunderEffect";
 import { LoadingScreen } from "./components/loader/LoadingScreen";
 import { audioManager } from "./utils/audioManager";
 
@@ -59,6 +60,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/slot-machine" element={<SlotMachine />} />
+          <Route path="/thunder-effect" element={<ThunderEffect />} />
         </Routes>
       )}
     </Router>
