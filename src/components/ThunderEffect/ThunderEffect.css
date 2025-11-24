@@ -7,9 +7,9 @@
 }
 
 /* Hide Leva GUI controls */
-[class*='leva'] {
+/* [class*='leva'] {
   display: none !important;
-}
+} */
 
 .sky-background {
   position: absolute;

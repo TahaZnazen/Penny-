@@ -6,8 +6,9 @@ import { useControls } from 'leva';
 import StormClouds from './StormClouds';
 import './ThunderEffect.css';
 
-// Preload the piggy bank model
+// Preload the models
 useGLTF.preload('/models/piggybank.glb');
+useGLTF.preload('/models/pillar.glb');
 
 // Camera updater component - updates camera position when GUI changes
 const CameraUpdater = ({ cameraX, cameraY, cameraZ, fov }) => {
@@ -31,6 +32,31 @@ const PiggyBankTarget = ({ position, scale, rotation }) => {
   const clonedScene = useMemo(() => {
     const cloned = scene.clone();
     // Enable shadows for all children
+    cloned.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+    return cloned;
+  }, [scene]);
+
+  return (
+    <primitive
+      object={clonedScene}
+      position={position}
+      scale={scale}
+      rotation={rotation}
+    />
+  );
+};
+
+// Pillar Model component
+const Pillar = ({ position, scale, rotation }) => {
+  const { scene } = useGLTF('/models/pillar.glb');
+
+  const clonedScene = useMemo(() => {
+    const cloned = scene.clone();
     cloned.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
@@ -108,10 +134,19 @@ const ThunderScene = ({ thunderActive, canvasControls }) => {
     positionX: { value: 0.0, min: -20, max: 20, step: 0.5, label: 'X Position' },
     positionY: { value: 3.5, min: -50, max: 10, step: 0.5, label: 'Y Position' },
     positionZ: { value: 0, min: -20, max: 20, step: 0.5, label: 'Z Position' },
-    scale: { value: 3.9, min: 0.1, max: 5, step: 0.1, label: 'Scale' },
+    scale: { value: 6.9, min: 0.1, max: 10, step: 0.1, label: 'Scale' },
     rotationX: { value: 0, min: -Math.PI, max: Math.PI, step: 0.1, label: 'Rotation X' },
     rotationY: { value: 0.5, min: -Math.PI, max: Math.PI, step: 0.1, label: 'Rotation Y' },
     rotationZ: { value: 0, min: -Math.PI, max: Math.PI, step: 0.1, label: 'Rotation Z' },
+  });
+
+  // Pillar offset controls (relative to piggy bank)
+  const pillarOffsets = useControls('Pillar Offsets', {
+    rotationXMultiplier: { value: 5, min: 0, max: 10, step: 0.5, label: 'Rotation X Multiplier' },
+    rotationY: { value: -2.3, min: -Math.PI, max: Math.PI, step: 0.1, label: 'Rotation Y' },
+    rotationZMultiplier: { value: 1, min: 0, max: 10, step: 0.5, label: 'Rotation Z Multiplier' },
+    positionYMultiplier: { value: -2.5, min: -5, max: 5, step: 0.1, label: 'Y Position Multiplier' },
+    scale: { value: 20, min: 0.1, max: 50, step: 0.5, label: 'Scale' },
   });
 
   // Camera controls
@@ -171,9 +206,24 @@ const ThunderScene = ({ thunderActive, canvasControls }) => {
         />
       ))}
 
+      {/* Pillar (under piggy bank) */}
+      <Pillar
+        position={[
+          targetControls.positionX,
+          targetControls.positionY * pillarOffsets.positionYMultiplier,
+          targetControls.positionZ
+        ]}
+        scale={pillarOffsets.scale}
+        rotation={[
+          targetControls.rotationX * pillarOffsets.rotationXMultiplier,
+          pillarOffsets.rotationY,
+          targetControls.rotationZ * pillarOffsets.rotationZMultiplier
+        ]}
+      />
+
       {/* Piggy Bank Target Model */}
       <PiggyBankTarget
-        position={[targetControls.positionX, targetControls.positionY, targetControls.positionZ]}
+        position={[targetControls.positionX-0.5, targetControls.positionY, targetControls.positionZ]}
         scale={targetControls.scale}
         rotation={[targetControls.rotationX, targetControls.rotationY, targetControls.rotationZ]}
       />
@@ -252,14 +302,14 @@ const ThunderEffect = () => {
 
       {/* Controls UI */}
       <div className="thunder-controls">
-        <h1 className="thunder-title">⚡ Thunder Effect ⚡</h1>
+        {/* <h1 className="thunder-title">⚡ Thunder Effect ⚡</h1> */}
 
         <div className="controls-panel">
           <button className="btn btn-trigger" onClick={triggerThunder}>
             Trigger Thunder
           </button>
 
-          <label className="auto-toggle">
+          {/* <label className="auto-toggle">
             <input
               type="checkbox"
               checked={autoThunder}
@@ -270,7 +320,7 @@ const ThunderEffect = () => {
 
           <button className="btn btn-home" onClick={goHome}>
             ← Back to Home
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
