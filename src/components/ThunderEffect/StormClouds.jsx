@@ -6,10 +6,10 @@ const StormClouds = ({ thunderActive }) => {
   // Storm cloud configuration with Leva controls
   const controls = useControls('Storm Clouds', {
     count: { value: 12, min: 5, max: 30, step: 1, label: 'Cloud Count' },
-    radius: { value: 5.0, min: 2, max: 20, step: 0.5, label: 'Spread Radius' },
-    yPosition: { value: 26.5, min: 5, max: 30, step: 0.5, label: 'Y Position' },
+    radius: { value: 20.0, min: 2, max: 20, step: 0.5, label: 'Spread Radius' },
+    yPosition: { value: 21.5, min: 5, max: 30, step: 0.5, label: 'Y Position' },
     yRange: { value: 3.0, min: 0, max: 10, step: 0.5, label: 'Y Spread' },
-    zPosition: { value: 0, min: -40, max: 40, step: 1, label: 'Z Position' },
+    zPosition: { value: -22, min: -40, max: 40, step: 1, label: 'Z Position' },
     segments: { value: 50, min: 20, max: 100, step: 5, label: 'Cloud Segments' },
     boundsX: { value: 6.0, min: 2, max: 25, step: 0.5, label: 'Cloud Width' },
     boundsY: { value: 4.0, min: 1, max: 15, step: 0.5, label: 'Cloud Height' },

@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { useNavigate } from 'react-router-dom';
 import { useControls } from 'leva';
 import StormClouds from './StormClouds';
+import BackgroundImage from './BackgroundImage';
+import RainEffect from './RainEffect';
 import './ThunderEffect.css';
 
-// Preload the models
-useGLTF.preload('/models/piggybank.glb');
-useGLTF.preload('/models/pillar.glb');
+ 
 
 // Camera updater component - updates camera position when GUI changes
 const CameraUpdater = ({ cameraX, cameraY, cameraZ, fov }) => {
@@ -23,59 +23,7 @@ const CameraUpdater = ({ cameraX, cameraY, cameraZ, fov }) => {
   return null;
 };
 
-// Piggy Bank Target Model component
-const PiggyBankTarget = ({ position, scale, rotation }) => {
-  // useGLTF automatically handles Draco-compressed models
-  const { scene } = useGLTF('/models/piggybank.glb');
-
-  // Clone the scene to allow multiple instances if needed
-  const clonedScene = useMemo(() => {
-    const cloned = scene.clone();
-    // Enable shadows for all children
-    cloned.traverse((child) => {
-      if (child.isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
-    });
-    return cloned;
-  }, [scene]);
-
-  return (
-    <primitive
-      object={clonedScene}
-      position={position}
-      scale={scale}
-      rotation={rotation}
-    />
-  );
-};
-
-// Pillar Model component
-const Pillar = ({ position, scale, rotation }) => {
-  const { scene } = useGLTF('/models/pillar.glb');
-
-  const clonedScene = useMemo(() => {
-    const cloned = scene.clone();
-    cloned.traverse((child) => {
-      if (child.isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-      }
-    });
-    return cloned;
-  }, [scene]);
-
-  return (
-    <primitive
-      object={clonedScene}
-      position={position}
-      scale={scale}
-      rotation={rotation}
-    />
-  );
-};
-
+  
 // Lightning bolt component
 const LightningBolt = ({ active, position = [0, 5, 0], config }) => {
   const [intensity, setIntensity] = useState(0);
@@ -109,7 +57,7 @@ const LightningBolt = ({ active, position = [0, 5, 0], config }) => {
 };
 
 // Thunder scene
-const ThunderScene = ({ thunderActive, canvasControls }) => {
+const ThunderScene = ({ thunderActive, canvasControls, showControls = true }) => {
   // Lighting controls
   const lightingControls = useControls('Lighting', {
     ambientIntensityInactive: { value: 0.15, min: 0, max: 2, step: 0.05, label: 'Ambient (Inactive)' },
@@ -193,6 +141,14 @@ const ThunderScene = ({ thunderActive, canvasControls }) => {
         color="#ffffff"
       />
 
+      {/* Background image - positioned behind clouds */}
+      <Suspense fallback={null}>
+        <BackgroundImage thunderActive={thunderActive} />
+      </Suspense>
+
+      {/* Rain effect - behind clouds */}
+      <RainEffect />
+
       {/* Storm clouds */}
       <StormClouds thunderActive={thunderActive} />
 
@@ -207,7 +163,7 @@ const ThunderScene = ({ thunderActive, canvasControls }) => {
       ))}
 
       {/* Pillar (under piggy bank) */}
-      <Pillar
+      {/* <Pillar
         position={[
           targetControls.positionX,
           targetControls.positionY * pillarOffsets.positionYMultiplier,
@@ -219,21 +175,21 @@ const ThunderScene = ({ thunderActive, canvasControls }) => {
           pillarOffsets.rotationY,
           targetControls.rotationZ * pillarOffsets.rotationZMultiplier
         ]}
-      />
+      /> */}
 
       {/* Piggy Bank Target Model */}
-      <PiggyBankTarget
+      {/* <PiggyBankTarget
         position={[targetControls.positionX-0.5, targetControls.positionY, targetControls.positionZ]}
         scale={targetControls.scale}
         rotation={[targetControls.rotationX, targetControls.rotationY, targetControls.rotationZ]}
-      />
+      /> */}
 
       {/* Camera controls */}
       <OrbitControls
         target={[canvasControls.targetX, canvasControls.targetY, canvasControls.targetZ]}
-        enableZoom={true}
-        enableRotate={true}
-        enablePan={true}
+        enableZoom={false}
+        enableRotate={showControls}
+        enablePan={showControls}
         minDistance={cameraControls.minDistance}
         maxDistance={cameraControls.maxDistance}
         maxPolarAngle={cameraControls.maxPolarAngle}
@@ -242,49 +198,86 @@ const ThunderScene = ({ thunderActive, canvasControls }) => {
   );
 };
 
-const ThunderEffect = () => {
-  const navigate = useNavigate();
+const ThunderEffect = ({
+  showControls = true,
+  onScrollComplete = null,
+  useNavigation = true
+}) => {
+  const navigate = useNavigation ? useNavigate() : null;
   const [thunderActive, setThunderActive] = useState(false);
-  const [autoThunder, setAutoThunder] = useState(true);
+  const [scrollCount, setScrollCount] = useState(0);
+  const [isCompleting, setIsCompleting] = useState(false);
 
-  // Canvas controls
-  const canvasControls = useControls('Canvas', {
-    cameraX: { value: 45, min: -50, max: 150, step: 1, label: 'Camera X' },
-    cameraY: { value: 3, min: -10, max: 140, step: 1, label: 'Camera Y' },
-    cameraZ: { value: 7, min: -50, max: 150, step: 1, label: 'Camera Z' },
-    fov: { value: 50, min: 30, max: 120, step: 5, label: 'Field of View' },
+  // Canvas controls - only show when showControls is true
+  const canvasControls = showControls ? useControls('Canvas', {
+    cameraX: { value: 0, min: -50, max: 150, step: 1, label: 'Camera X' },
+    cameraY: { value: 0, min: -10, max: 140, step: 1, label: 'Camera Y' },
+    cameraZ: { value: 11, min: -50, max: 150, step: 1, label: 'Camera Z' },
+    fov: { value: 75, min: 30, max: 120, step: 5, label: 'Field of View' },
     targetX: { value: 0, min: -50, max: 50, step: 1, label: 'Look At X' },
     targetY: { value: 13, min: -10, max: 30, step: 1, label: 'Look At Y' },
     targetZ: { value: 0, min: -50, max: 50, step: 1, label: 'Look At Z' },
-  });
-
-  // Auto thunder effect
-  useEffect(() => {
-    if (!autoThunder) return;
-
-    const thunderInterval = setInterval(() => {
-      setThunderActive(true);
-
-      // Thunder duration
-      setTimeout(() => {
-        setThunderActive(false);
-      }, 200 + Math.random() * 300);
-    }, 2000 + Math.random() * 3000);
-
-    return () => clearInterval(thunderInterval);
-  }, [autoThunder]);
-
-  const goHome = () => {
-    navigate('/');
+  }) : {
+    cameraX: 0,
+    cameraY: 0,
+    cameraZ: 11,
+    fov: 75,
+    targetX: 0,
+    targetY: 13,
+    targetZ: 0
   };
 
+  // Trigger thunder on scroll
   const triggerThunder = () => {
     setThunderActive(true);
     setTimeout(() => setThunderActive(false), 300);
   };
 
+  // Handle scroll event
+  useEffect(() => {
+    let scrollTimeout;
+
+    const handleScroll = () => {
+      // Clear existing timeout
+      clearTimeout(scrollTimeout);
+
+      // Trigger thunder
+      triggerThunder();
+
+      // Increment scroll count after a delay (debounce)
+      scrollTimeout = setTimeout(() => {
+        setScrollCount(prev => {
+          const newCount = prev + 1;
+
+          // After 5 scrolls, either call callback or navigate
+          if (newCount >= 5) {
+            if (onScrollComplete) {
+              // Loader mode: trigger fade-out then callback
+              setIsCompleting(true);
+              setTimeout(() => {
+                onScrollComplete();
+              }, 1000); // Match fade-out duration
+            } else if (useNavigation && navigate) {
+              // Route mode: navigate to home
+              navigate('/');
+            }
+          }
+
+          return newCount;
+        });
+      }, 500);
+    };
+
+    window.addEventListener('wheel', handleScroll);
+
+    return () => {
+      window.removeEventListener('wheel', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [navigate, onScrollComplete, useNavigation]);
+
   return (
-    <div className="thunder-effect-container">
+    <div className={`thunder-effect-container ${isCompleting ? 'fade-out' : ''}`}>
       {/* Sky background that flashes */}
       <div className={`sky-background ${thunderActive ? 'flash' : ''}`} />
 
@@ -297,30 +290,13 @@ const ThunderEffect = () => {
         }}
         style={{ width: '100%', height: '100%' }}
       >
-        <ThunderScene thunderActive={thunderActive} canvasControls={canvasControls} />
+        <ThunderScene thunderActive={thunderActive} canvasControls={canvasControls} showControls={showControls} />
       </Canvas>
 
-      {/* Controls UI */}
+      {/* Scroll counter display */}
       <div className="thunder-controls">
-        {/* <h1 className="thunder-title">⚡ Thunder Effect ⚡</h1> */}
-
-        <div className="controls-panel">
-          <button className="btn btn-trigger" onClick={triggerThunder}>
-            Trigger Thunder
-          </button>
-
-          {/* <label className="auto-toggle">
-            <input
-              type="checkbox"
-              checked={autoThunder}
-              onChange={(e) => setAutoThunder(e.target.checked)}
-            />
-            <span>Auto Thunder</span>
-          </label>
-
-          <button className="btn btn-home" onClick={goHome}>
-            ← Back to Home
-          </button> */}
+        <div className="scroll-counter">
+          Scroll {scrollCount}/5 times to continue
         </div>
       </div>
     </div>

@@ -5,7 +5,8 @@ import { useProgress, Preload } from "@react-three/drei";
 import Home from "./components/Home";
 import SlotMachine from "./components/SlotMachine";
 import ThunderEffect from "./components/ThunderEffect/ThunderEffect";
-import { LoadingScreen } from "./components/loader/LoadingScreen";
+import MinimalLoader from "./components/loader/MinimalLoader";
+import ThunderLoader from "./components/ThunderLoader/ThunderLoader";
 import { audioManager } from "./utils/audioManager";
 
 function AssetsTracker({ onReady }) {
@@ -21,33 +22,47 @@ function AssetsTracker({ onReady }) {
 }
 
 function App() {
-  const [hasStarted, setHasStarted] = useState(false);
   const [assetsLoaded, setAssetsLoaded] = useState(false);
+  const [hasStartedExperience, setHasStartedExperience] = useState(false);
+  const [hasCompletedThunder, setHasCompletedThunder] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-
-  const handleStart = () => {
-    audioManager.playChill();
-    setIsTransitioning(true);
-
-    setTimeout(() => {
-      setHasStarted(true);
-      setIsTransitioning(false);
-    }, 1500);
-  };
 
   const handleAssetsReady = () => {
     setAssetsLoaded(true);
   };
 
+  const handleStartExperience = () => {
+    // Start audio
+    audioManager.playBackgroundMusic();
+
+    // Transition to thunder scene
+    setIsTransitioning(true);
+
+    setTimeout(() => {
+      setHasStartedExperience(true);
+      setIsTransitioning(false);
+    }, 1000); // Match fade-out duration
+  };
+
+  const handleThunderComplete = () => {
+    setHasCompletedThunder(true);
+  };
+
   return (
     <Router>
-      {/* Global Loading Screen - only shows once */}
-      <LoadingScreen
-        isLoading={!hasStarted}
-        onStart={handleStart}
-        assetsLoaded={assetsLoaded}
-        isTransitioning={isTransitioning}
-      />
+      {/* Step 1: Minimal Loader - Shows while assets loading, then shows "Start Experience" button */}
+      {!hasStartedExperience && (
+        <MinimalLoader
+          assetsLoaded={assetsLoaded}
+          onStart={handleStartExperience}
+          isTransitioning={isTransitioning}
+        />
+      )}
+
+      {/* Step 2: Thunder Scene - Interactive 5-scroll experience */}
+      {hasStartedExperience && !hasCompletedThunder && (
+        <ThunderLoader onComplete={handleThunderComplete} />
+      )}
 
       {/* Hidden Canvas for preloading assets */}
       <Canvas style={{ position: 'fixed', top: -9999, left: -9999, width: 1, height: 1 }}>
@@ -55,8 +70,8 @@ function App() {
         <AssetsTracker onReady={handleAssetsReady} />
       </Canvas>
 
-      {/* Routes */}
-      {hasStarted && (
+      {/* Step 3: Routes - Main application */}
+      {hasCompletedThunder && (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/slot-machine" element={<SlotMachine />} />

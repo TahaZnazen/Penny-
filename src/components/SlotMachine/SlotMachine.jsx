@@ -7,19 +7,9 @@ const SlotMachine = ({ isEmbedded = false }) => {
   const navigate = useNavigate();
 
   const handleBackClick = () => {
-    console.log('Back button clicked! isEmbedded:', isEmbedded);
-    if (isEmbedded) {
-      // Scroll to top when embedded in Home page
-      console.log('Scrolling to top...');
-      // Try multiple scroll methods to ensure it works
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    } else {
-      // Navigate to home when standalone
-      console.log('Navigating to home...');
+ 
       navigate('/');
-    }
+   
   };
 
   return (
@@ -28,7 +18,7 @@ const SlotMachine = ({ isEmbedded = false }) => {
         className="back-home-button"
         onClick={handleBackClick}
       >
-        {isEmbedded ? '↑ Back to Top' : '← Back'}
+          ← Back  
       </button>
 
       {/* <AnimatedBackground /> */}
