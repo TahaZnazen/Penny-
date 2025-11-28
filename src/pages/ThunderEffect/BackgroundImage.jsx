@@ -51,7 +51,7 @@ const BackgroundImage = ({ thunderActive = false }) => {
 
     // Display options
     fitMode: {
-      value: 'contain',
+      value: 'cover',
       options: ['cover', 'contain', 'stretch', 'manual'],
       label: 'Fit Mode'
     },
