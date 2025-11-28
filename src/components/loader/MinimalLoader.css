@@ -24,9 +24,7 @@
   width: 100%;
   height: 100%;
   z-index: 0;
-  /* background-image:  url(/textures/animation.jpeg)  ; */
   background-size: cover;
-
 }
 
 .minimal-loader-content {
@@ -65,10 +63,10 @@
   text-shadow:
     0 0 10px rgba(160, 196, 255, 0.8),
     0 0 20px rgba(160, 196, 255, 0.6);
-  animation: pulse-glow 2s ease-in-out infinite;
+  animation: loader-pulse-glow 2s ease-in-out infinite;
 }
 
-@keyframes pulse-glow {
+@keyframes loader-pulse-glow {
   0%, 100% {
     text-shadow:
       0 0 10px rgba(160, 196, 255, 0.8),
@@ -92,13 +90,13 @@
   background: transparent;
    border-radius: 15px;
   cursor: pointer;
- 
+
    transition: all 0.3s ease;
-  animation: button-appear 0.5s ease-out, button-pulse 2s ease-in-out infinite;
+  animation: loader-button-appear 0.5s ease-out, loader-button-pulse 2s ease-in-out infinite;
   border: 4px solid  black;
 }
 
-@keyframes button-appear {
+@keyframes loader-button-appear {
   0% {
     opacity: 0;
     transform: scale(0.8);
@@ -109,7 +107,7 @@
   }
 }
 
-@keyframes button-pulse {
+@keyframes loader-button-pulse {
   0%, 100% {
     box-shadow:
       0 0 20px rgba(160, 196, 255, 0.3),

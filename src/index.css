@@ -782,7 +782,7 @@ body {
 .btn-try-luck {
   background: linear-gradient(45deg, #ffd700, #ff69b4, #00d4ff, #9d4edd, #ffd700);
   background-size: 300% 300%;
-  animation: gradient-slide 4s ease infinite, pulse-glow 2s ease-in-out infinite;
+  animation: gradient-slide 4s ease infinite, home-pulse-glow 2s ease-in-out infinite;
   color: #fff;
   text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
   font-size: clamp(16px, 3vw, 24px);
@@ -795,7 +795,7 @@ body {
   box-shadow: 0 0 50px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 105, 180, 0.8);
 }
 
-@keyframes pulse-glow {
+@keyframes home-pulse-glow {
   0%, 100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
   50% { box-shadow: 0 0 50px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 105, 180, 0.8); }
 }
