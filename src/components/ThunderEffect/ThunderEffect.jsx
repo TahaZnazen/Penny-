@@ -8,8 +8,6 @@ import BackgroundImage from './BackgroundImage';
 import RainEffect from './RainEffect';
 import './ThunderEffect.css';
 
- 
-
 // Camera updater component - updates camera position when GUI changes
 const CameraUpdater = ({ cameraX, cameraY, cameraZ, fov }) => {
   const { camera } = useThree();
@@ -141,16 +139,12 @@ const ThunderScene = ({ thunderActive, canvasControls, showControls = true }) =>
         color="#ffffff"
       />
 
-      {/* Background image - positioned behind clouds */}
+      {/* Background, Rain, and Storm clouds - wrapped together to load simultaneously */}
       <Suspense fallback={null}>
         <BackgroundImage thunderActive={thunderActive} />
+        <RainEffect />
+        <StormClouds thunderActive={thunderActive} />
       </Suspense>
-
-      {/* Rain effect - behind clouds */}
-      <RainEffect />
-
-      {/* Storm clouds */}
-      <StormClouds thunderActive={thunderActive} />
 
       {/* Lightning bolts at different positions */}
       {lightningBolts.map((bolt, i) => (
@@ -277,7 +271,7 @@ const ThunderEffect = ({
   }, [navigate, onScrollComplete, useNavigation]);
 
   return (
-    <div className={`thunder-effect-container ${isCompleting ? 'fade-out' : ''}`}>
+    <div className={`thunder-effect-container  `}>
       {/* Sky background that flashes */}
       <div className={`sky-background ${thunderActive ? 'flash' : ''}`} />
 

@@ -3,7 +3,7 @@ import './MinimalLoader.css';
 
 const MinimalLoader = ({ assetsLoaded, onStart, isTransitioning }) => {
   return (
-    <div className={`minimal-loader-container ${isTransitioning ? 'fade-out' : ''}`}>
+    <div className={`minimal-loader-container  `}>
       {/* Dark background */}
       <div className="minimal-loader-background"></div>
 
@@ -13,17 +13,17 @@ const MinimalLoader = ({ assetsLoaded, onStart, isTransitioning }) => {
           // Loading state
           <>
             <div className="minimal-loader-spinner"></div>
-            <div className="minimal-loader-text">Loading Storm...</div>
+            <div className="minimal-loader-text">Loading  ...</div>
           </>
-        ) : (
-          // Ready state - Show Start Experience button
+        ) : !isTransitioning ? (
+          // Ready state - Show Start Experience button (only when not transitioning)
           <button
             className="minimal-start-btn"
             onClick={onStart}
           >
-            ⚡ Start Experience
+              Start Experience
           </button>
-        )}
+        ) : null}
       </div>
     </div>
   );
