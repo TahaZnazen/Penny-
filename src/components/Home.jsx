@@ -6,6 +6,7 @@ import { audioManager } from "../utils/audioManager";
 import { FaTelegram } from "react-icons/fa";
 import { PiXLogoBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
+import "./Home.css";
 
 function Home() {
   const navigate = useNavigate();
