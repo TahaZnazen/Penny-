@@ -53,8 +53,13 @@ const PiggyBankPiece = ({
   });
 
   useEffect(() => {
-    document.body.style.cursor =
-      hovered && !isBroken && !autoBreak ? "pointer" : "auto";
+    if (hovered && !isBroken && !autoBreak) {
+      document.body.style.cursor = "pointer";
+    }
+    // Cleanup: reset cursor when component unmounts or hover ends
+    return () => {
+      document.body.style.cursor = "auto";
+    };
   }, [hovered, isBroken, autoBreak]);
 
   // Remove piece if it falls too far
@@ -226,14 +231,24 @@ export const PiggyBank = (props) => {
   const effectiveBreakPercentage = autoShatter ? 1 : breakPercentage;
   const glowIntensity = effectiveBreakPercentage;
 
-  // Check if 40% threshold reached
+  // Track if we've already triggered the shatter
+  const hasTriggeredShatter = useRef(false);
+
+  // Check if 20% threshold reached - consolidated logic to prevent race conditions
   useEffect(() => {
-    if (breakPercentage >= 0.2 && !autoShatter) {
+    const SHATTER_THRESHOLD = 0.2;
+
+    if (breakPercentage >= SHATTER_THRESHOLD && !autoShatter && !hasTriggeredShatter.current) {
+      hasTriggeredShatter.current = true;
       audioManager.playFinal();
 
       // Start auto-shatter after a brief delay
       shatterTimerRef.current = setTimeout(() => {
         setAutoShatter(true);
+        // Notify parent component
+        if (props?.setIsbroken) {
+          props.setIsbroken(true);
+        }
       }, 100);
     }
 
@@ -242,33 +257,21 @@ export const PiggyBank = (props) => {
         clearTimeout(shatterTimerRef.current);
       }
     };
-  }, [breakPercentage, autoShatter]);
+  }, [breakPercentage, autoShatter, props]);
 
   const handlePieceClick = (index) => {
-
     if (!brokenPieces.has(index) && !autoShatter) {
       setBrokenPieces((prev) => new Set([...prev, index]));
       audioManager.playBreak();
     }
   };
 
-  useEffect(() => {
-    if (effectiveBreakPercentage >= 0.21 && !initialBroken) {
-      props?.setIsbroken(true);
-    }
-  }, [effectiveBreakPercentage, initialBroken]);
-
   // Notify parent component immediately if initially broken
   useEffect(() => {
     if (initialBroken && props?.setIsbroken) {
       props.setIsbroken(true);
     }
-  }, [initialBroken]);
-
-  useEffect(() => {
-    // Model is loaded
-    console.log("Piggy bank model loaded!");
-  }, [nodes]);
+  }, [initialBroken, props]);
 
   // Calculate coin scale and position with smooth transition
   const coinScale =
@@ -323,15 +326,12 @@ export const PiggyBank = (props) => {
   );
 };
 
-// Preload the model
-useGLTF.preload("/models/piggybank.glb");
-
-const PennyCoin = ({ glowIntensity = 1, position = [0, 0, 0], scale = 1 }) => { 
+const PennyCoin = ({ glowIntensity = 1, position = [0, 0, 0], scale = 1 }) => {
   const coinRef = useRef();
-  const [currentScale, setCurrentScale] = useState(scale);
-  const [currentPosition, setCurrentPosition] = useState(position);
+  const currentScaleRef = useRef(scale);
+  const currentPositionRef = useRef([...position]);
 
-  // Smooth interpolation for scale and position
+  // Smooth interpolation for scale and position using refs (not state!)
   useFrame(() => {
     if (coinRef.current) {
       // Rotate back and forth (pendulum motion)
@@ -339,19 +339,19 @@ const PennyCoin = ({ glowIntensity = 1, position = [0, 0, 0], scale = 1 }) => {
         Math.sin(Date.now() * 0.0015) * Math.PI * 0.3 + Math.PI * 0.3;
 
       // Smooth scale transition
-      setCurrentScale((prev) => prev + (scale - prev) * 0.05);
+      currentScaleRef.current += (scale - currentScaleRef.current) * 0.05;
+      coinRef.current.scale.setScalar(currentScaleRef.current);
 
       // Smooth position transition
-      setCurrentPosition((prev) => [
-        prev[0] + (position[0] - prev[0]) * 0.05,
-        prev[1] + (position[1] - prev[1]) * 0.5,
-        prev[2] + (position[2] - prev[2]) * 0.05,
-      ]);
+      currentPositionRef.current[0] += (position[0] - currentPositionRef.current[0]) * 0.05;
+      currentPositionRef.current[1] += (position[1] - currentPositionRef.current[1]) * 0.5;
+      currentPositionRef.current[2] += (position[2] - currentPositionRef.current[2]) * 0.05;
+      coinRef.current.position.set(...currentPositionRef.current);
     }
   });
 
   return (
-    <group ref={coinRef} position={currentPosition} scale={currentScale}>
+    <group ref={coinRef} position={position} scale={scale}>
       {/* Main coin body with gradient */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.2, 0.2, 0.05, 32]} />

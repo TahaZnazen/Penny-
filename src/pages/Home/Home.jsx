@@ -30,10 +30,10 @@ function Home() {
   // Save broken state to localStorage whenever it changes
   const handleBroken = (broken) => {
     setIsbroken(broken);
-    if (broken) {
-      localStorage.setItem('piggyBankBroken', 'true');
-      console.log('💾 Saved piggy bank broken state to localStorage');
-    }
+    // if (broken) {
+    //   localStorage.setItem('piggyBankBroken', 'true');
+    //   console.log('💾 Saved piggy bank broken state to localStorage');
+    // }
   };
 
   return (

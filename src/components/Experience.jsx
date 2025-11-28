@@ -1,12 +1,10 @@
 import {
-  Billboard,
   ContactShadows,
   Environment,
   Float,
   OrbitControls,
   useTexture,
 } from "@react-three/drei";
-import { useControls } from "leva";
 import * as THREE from "three";
 import { Suspense, useEffect } from "react";
 import { PiggyBank } from "./PiggyBank";

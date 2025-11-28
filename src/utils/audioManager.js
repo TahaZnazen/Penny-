@@ -39,10 +39,12 @@ class AudioManager {
     this.finalSound.currentTime = 0;
   }
 
-  playChill(){
-    this.chillSound.play();
-    this.chillSound.volume = 0.4;
-
+  playChill() {
+    // Only play if not already playing to prevent overlap
+    if (this.chillSound.paused) {
+      this.chillSound.volume = 0.4;
+      this.chillSound.play().catch(e => console.warn('Chill audio play failed:', e));
+    }
   }
     muteChill(){
     this.chillSound.pause();

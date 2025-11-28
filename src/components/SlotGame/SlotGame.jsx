@@ -1,41 +1,40 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import './SlotGame.css';
 
-const SlotGame = ({ autoStart = false, onJackpot }) => {
-  // Define symbols with images and weights (higher weight = more common)
-  // Weight examples: 1 = very rare, 10 = common, 20 = very common
-  const SYMBOLS = [
-    { id: 'penny', src: '/imgs/penny.png', alt: 'Penny', weight: 5},        // JACKPOT - VERY RARE
-    { id: 'ass', src: '/imgs/ass.png', alt: 'ass', weight: 12 },
-    { id: 'cool', src: '/imgs/cool.png', alt: 'cool', weight: 12 },
-    { id: 'pepe', src: '/imgs/pepe.png', alt: 'pepe', weight: 12 },
-    { id: 'pig', src: '/imgs/pig.png', alt: 'pig', weight: 12 },
-    { id: 'spit', src: '/imgs/spit.png', alt: 'spit', weight: 12 },
-    { id: 'trump', src: '/imgs/trump.png', alt: 'trump', weight: 12 },
-    { id: 'viking', src: '/imgs/viking.png', alt: 'viking', weight: 12 },
-    { id: 'cill', src: '/imgs/chill.png', alt: 'cill', weight: 12 },
-  ];
+// Define symbols with images and weights (higher weight = more common)
+// Weight examples: 1 = very rare, 10 = common, 20 = very common
+const SYMBOLS = [
+  { id: 'penny', src: '/imgs/penny.png', alt: 'Penny', weight: 5 },        // JACKPOT - VERY RARE
+  { id: 'ass', src: '/imgs/ass.png', alt: 'ass', weight: 12 },
+  { id: 'cool', src: '/imgs/cool.png', alt: 'cool', weight: 12 },
+  { id: 'pepe', src: '/imgs/pepe.png', alt: 'pepe', weight: 12 },
+  { id: 'pig', src: '/imgs/pig.png', alt: 'pig', weight: 12 },
+  { id: 'spit', src: '/imgs/spit.png', alt: 'spit', weight: 12 },
+  { id: 'trump', src: '/imgs/trump.png', alt: 'trump', weight: 12 },
+  { id: 'viking', src: '/imgs/viking.png', alt: 'viking', weight: 12 },
+  { id: 'cill', src: '/imgs/chill.png', alt: 'cill', weight: 12 },
+];
 
-  const JACKPOT_SYMBOL = 'penny'; // Only 5 pennies win the jackpot
+const JACKPOT_SYMBOL = 'penny'; // Only 5 pennies win the jackpot
+const SPIN_DURATION = 3000; // 3 seconds
+const REEL_COUNT = 5;
+const VISIBLE_SYMBOLS = 3;
 
-  // Function to select a random symbol based on weights
-  const getWeightedRandomSymbol = () => {
-    const totalWeight = SYMBOLS.reduce((sum, symbol) => sum + symbol.weight, 0);
-    let random = Math.random() * totalWeight;
+// Function to select a random symbol based on weights
+const getWeightedRandomSymbol = () => {
+  const totalWeight = SYMBOLS.reduce((sum, symbol) => sum + symbol.weight, 0);
+  let random = Math.random() * totalWeight;
 
-    for (const symbol of SYMBOLS) {
-      random -= symbol.weight;
-      if (random <= 0) {
-        return symbol;
-      }
+  for (const symbol of SYMBOLS) {
+    random -= symbol.weight;
+    if (random <= 0) {
+      return symbol;
     }
-    return SYMBOLS[0]; // Fallback
-  };
+  }
+  return SYMBOLS[0]; // Fallback
+};
 
-  const SPIN_DURATION = 3000; // 3 seconds
-  const REEL_COUNT = 5;
-  const VISIBLE_SYMBOLS = 3;
-
+const SlotGame = ({ autoStart = false, onJackpot }) => {
   const [reels, setReels] = useState(
     Array(REEL_COUNT).fill(null).map(() =>
       Array(20).fill(null).map(() => getWeightedRandomSymbol())
@@ -51,18 +50,28 @@ const SlotGame = ({ autoStart = false, onJackpot }) => {
     reelRefs.current = reelRefs.current.slice(0, REEL_COUNT);
   }, []);
 
-  // Auto-start spin if autoStart prop is true
-  useEffect(() => {
-    if (autoStart) {
-      const timer = setTimeout(() => {
-        spin();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoStart]);
+  const checkWin = useCallback((currentReels) => {
+    // Get the middle symbol from each reel (index 8)
+    const middleSymbols = currentReels.map(reel => reel[8]);
 
-  const spin = () => {
+    // Check if all 5 symbols are pennies (the JACKPOT symbol)
+    const allPennies = middleSymbols.every(symbol => symbol.id === JACKPOT_SYMBOL);
+
+    if (allPennies) {
+      // ALL 5 PENNIES - JACKPOT!
+      setResult({ type: 'jackpot', message: '5 Pennies! JACKPOT!', symbols: middleSymbols });
+
+      // Trigger explosion animation on the 3D model
+      if (onJackpot) {
+        onJackpot();
+      }
+    } else {
+      // Anything else is a loss
+      setResult({ type: 'lose', message: 'Try Again!', symbols: middleSymbols });
+    }
+  }, [onJackpot]);
+
+  const spin = useCallback(() => {
     if (spinning) return;
 
     setSpinning(true);
@@ -83,8 +92,6 @@ const SlotGame = ({ autoStart = false, onJackpot }) => {
         ref.classList.remove('spinning');
 
         // Reset to starting position (symbol 8 perfectly centered)
-        // Symbol 8's middle (42.5% of reel) aligns with window middle (50%)
-        // Window shows 15% of reel, so starts at 35% (42.5 - 7.5)
         ref.style.transform = 'translateY(-35%)';
       }
     });
@@ -109,8 +116,6 @@ const SlotGame = ({ autoStart = false, onJackpot }) => {
           ref.classList.remove('spinning');
 
           // Calculate final position to center symbol at index 8 perfectly
-          // Window shows 15% of reel (3/20), positioned to show symbols 7, 8, 9
-          // Symbol 8's center (42.5%) aligns with window center (50%)
           const finalTransform = 'translateY(-35%)';
 
           // Apply smooth deceleration
@@ -135,37 +140,20 @@ const SlotGame = ({ autoStart = false, onJackpot }) => {
       setSpinning(false);
       checkWin(newReels);
     }, totalDuration + 200);
-  };
+  }, [spinning, checkWin]);
 
-  const checkWin = (currentReels) => {
-    // Get the middle symbol from each reel (index 8)
-    const middleSymbols = currentReels.map(reel => reel[8]);
-
-    // Check if all 5 symbols are pennies (the JACKPOT symbol)
-    const allPennies = middleSymbols.every(symbol => symbol.id === JACKPOT_SYMBOL);
-
-    if (allPennies) {
-      // ALL 5 PENNIES - JACKPOT!
-      console.log('🎰 JACKPOT! Triggering explosion!');
-      setResult({ type: 'jackpot', message: '🎊 JACKPOT! 5 Pennies! 🎊', symbols: middleSymbols });
-
-      // Trigger explosion animation on the 3D model
-      if (onJackpot) {
-        onJackpot();
-      }
-    } else {
-      // Anything else is a loss
-      setResult({ type: 'lose', message: 'Try Again!', symbols: middleSymbols });
+  // Auto-start spin if autoStart prop is true
+  useEffect(() => {
+    if (autoStart) {
+      const timer = setTimeout(() => {
+        spin();
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [autoStart, spin]);
 
   return (
     <>
-      {/* Title Bar */}
-      {/* <div className="screen-header">
-        <span className="screen-title">PENNY SLOTS</span>
-      </div> */}
-
       {/* Reels Display */}
       <div className="reels-container">
         {reels.map((reel, reelIndex) => (
