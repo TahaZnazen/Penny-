@@ -1,8 +1,8 @@
 import { Canvas } from "@react-three/fiber";
-import { Experience } from "./Experience";
+import { Experience } from "../../components/Experience";
 import { useState } from "react";
 import { Preload } from "@react-three/drei";
-import { audioManager } from "../utils/audioManager";
+import { audioManager } from "../../utils/audioManager";
 import { FaTelegram } from "react-icons/fa";
 import { PiXLogoBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";

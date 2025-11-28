@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./components/Home";
-import SlotMachine from "./components/SlotMachine";
-import ThunderEffect from "./components/ThunderEffect/ThunderEffect";
-
+import Home from "./pages/Home/Home";
+import SlotMachine from "./pages/SlotMachine/SlotMachine";
+import ThunderEffect from "./pages/ThunderEffect/ThunderEffect";
+ 
 function App() {
   return (
     <Router>

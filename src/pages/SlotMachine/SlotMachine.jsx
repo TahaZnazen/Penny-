@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import AnimatedBackground from '../AnimatedBackground/AnimatedBackground';
-import SlotMachineView from '../SlotMachineView/SlotMachineView';
+import AnimatedBackground from '../../components/AnimatedBackground/AnimatedBackground';
+import SlotMachineView from '../../components/SlotMachineView/SlotMachineView';
 import './SlotMachine.css';
 
 const SlotMachine = ({ isEmbedded = false }) => {
