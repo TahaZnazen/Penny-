@@ -2,18 +2,17 @@
 .slot-machine-container {
   width: 100vw;
   height: 100vh;
-  /* background-image: url('/textures/bg0.png'); */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative; /* Changed from fixed to relative for embedded mode */
+  position: relative;
   top: 0;
   left: 0;
   overflow: hidden;
-  background-color: #0a0805; /* Dark fallback color */
+  background-color: #0a0805;
 }
 
 /* Back Button */
@@ -31,8 +30,8 @@
   cursor: pointer;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
-  z-index: 99999; /* Increased z-index to ensure it's always clickable */
-  pointer-events: auto; /* Ensure pointer events work */
+  z-index: 99999;
+  pointer-events: auto;
 }
 
 .back-home-button:hover {
@@ -41,20 +40,12 @@
   transform: translateX(-3px);
 }
 
-/* Screen wrapper - ensure clickable but behind 3D */
-.screen-wrapper {
-  pointer-events: auto !important;
-  position: relative !important;
-}
-
-/* Show 3D model view */
-.slot-machine-3d-view {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-/* Game view hidden - responsive will be remade */
-.slot-machine-game-view {
-  display: none;
+/* Mobile back button */
+@media (max-width: 768px) {
+  .back-home-button {
+    top: initial;
+    bottom: 0;
+    left: 0;
+    border-radius: 0 10px 0  0 ;
+  }
 }

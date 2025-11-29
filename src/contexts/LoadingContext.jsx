@@ -16,8 +16,7 @@ const PRELOAD_MODELS = [
 const PRELOAD_TEXTURES = [
   '/textures/bg.png',
   '/textures/bg0.png',
-  '/textures/loadingbg.jpeg',
-  '/textures/game2.png',
+   '/textures/game2.png',
 ];
 
 const PRELOAD_IMAGES = [

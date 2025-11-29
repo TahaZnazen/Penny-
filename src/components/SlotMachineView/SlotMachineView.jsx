@@ -8,7 +8,26 @@ import WinPennyScreen from '../WinPennyScreen/WinPennyScreen';
 import BackgroundPlane from './BackgroundPlane';
 import BottomClouds from './BottomClouds';
 import AmbientParticles from './AmbientParticles';
+import SlotGameContent, { useSlotGameState } from '../SlotGameContent';
 import './SlotMachineView.css';
+
+// Hook to detect mobile
+const useIsMobile = (breakpoint = 768) => {
+  const [isMobile, setIsMobile] = React.useState(
+    typeof window !== 'undefined' ? window.innerWidth <= breakpoint : false
+  );
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= breakpoint);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [breakpoint]);
+
+  return isMobile;
+};
 
 const SlotMachineScene = ({ onPennyWin, onPigJackpot, introComplete }) => {
   const modelRef = React.useRef();
@@ -141,15 +160,29 @@ const SlotMachineView = () => {
   const [showJackpotScreen, setShowJackpotScreen] = React.useState(false);
   const [showPennyWinScreen, setShowPennyWinScreen] = React.useState(false);
   const [introComplete, setIntroComplete] = React.useState(false);
+  const isMobile = useIsMobile();
 
-  // Mark intro as complete after 3 seconds
+  // Shared game state for mobile (desktop uses TVScreenInGap's own state)
+  const mobileGameState = useSlotGameState({
+    onPennyWin: () => {
+      console.log('MobileView: handlePennyWin called');
+      setShowPennyWinScreen(true);
+    },
+    onPigJackpot: () => {
+      console.log('MobileView: handlePigJackpot called');
+      setShowJackpotScreen(true);
+    },
+  });
+
+  // Mark intro as complete after 3 seconds (only for desktop)
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIntroComplete(true);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
+    if (!isMobile) {
+      const timer = setTimeout(() => {
+        setIntroComplete(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isMobile]);
 
   const handlePennyWin = () => {
     console.log('SlotMachineView: handlePennyWin called');
@@ -163,18 +196,30 @@ const SlotMachineView = () => {
 
   return (
     <div className="slot-machine-view">
-      {/* 3D Slot Machine Model with integrated screen */}
-      <Canvas
-        shadows
-        camera={{ position: [0, 0, 5], fov: 50 }}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <SlotMachineScene
-          onPennyWin={handlePennyWin}
-          onPigJackpot={handlePigJackpot}
-          introComplete={introComplete}
+      {isMobile ? (
+        /* Mobile: 2D game only, no 3D Canvas */
+        <SlotGameContent
+          gameState={mobileGameState.gameState}
+          onStartGame={mobileGameState.handleStartGame}
+          onPennyWin={mobileGameState.handlePennyWin}
+          onPigJackpot={mobileGameState.handlePigJackpot}
+          onLose={mobileGameState.handleLose}
+          isMobile={true}
         />
-      </Canvas>
+      ) : (
+        /* Desktop: Full 3D experience */
+        <Canvas
+          shadows
+          camera={{ position: [0, 0, 5], fov: 50 }}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <SlotMachineScene
+            onPennyWin={handlePennyWin}
+            onPigJackpot={handlePigJackpot}
+            introComplete={introComplete}
+          />
+        </Canvas>
+      )}
 
       {/* Jackpot Win Screen Overlay (all 5 pigs) */}
       <JackpotScreen show={showJackpotScreen} />

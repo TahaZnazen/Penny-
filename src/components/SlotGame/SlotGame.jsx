@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import './SlotGame.css';
+import { sounds, preloadSounds, unlockAudio } from '../../utils/sounds';
 
 // Define symbols with images and weights (higher weight = more common)
 const SYMBOLS = [
   { id: 'penny', src: '/imgs/penny.png', alt: 'Penny', weight: 5 },
-  { id: 'pig', src: '/imgs/pig.png', alt: 'pig', weight: 5000 },
+  { id: 'pig', src: '/imgs/pig.png', alt: 'pig', weight: 5 },
   { id: 'ass', src: '/imgs/ass.png', alt: 'ass', weight: 12 },
   { id: 'cool', src: '/imgs/cool.png', alt: 'cool', weight: 12 },
   { id: 'pepe', src: '/imgs/pepe.png', alt: 'pepe', weight: 12 },
@@ -49,9 +50,10 @@ const SlotGame = ({ autoStart = false, onPennyWin, onPigJackpot, onLose }) => {
   const reelRefs = useRef([]);
   const hasStarted = useRef(false); // Track if spin already started
 
-  // Initialize reel refs
+  // Initialize reel refs and preload sounds
   useEffect(() => {
     reelRefs.current = reelRefs.current.slice(0, REEL_COUNT);
+    preloadSounds();
   }, []);
 
   const checkWin = (currentReels) => {
@@ -66,23 +68,33 @@ const SlotGame = ({ autoStart = false, onPennyWin, onPigJackpot, onLose }) => {
     if (allPennies) {
       // ALL 5 PENNIES - Penny Win!
       console.log('SlotGame: All pennies - calling onPennyWin');
+      sounds.pennyWin();
       if (onPennyWin) onPennyWin();
     } else if (allPigs) {
       // ALL 5 PIGS - JACKPOT!
       console.log('SlotGame: All pigs - calling onPigJackpot');
+      sounds.jackpot();
       if (onPigJackpot) onPigJackpot();
     } else {
       // Anything else is a loss
       console.log('SlotGame: Loss - calling onLose');
+      sounds.lose();
       if (onLose) onLose();
     }
   };
 
   const spin = () => {
+    console.log('SlotGame: spin() called, spinning:', spinning);
+    console.log('SlotGame: reelRefs.current:', reelRefs.current);
     if (spinning) return;
 
+    console.log('SlotGame: Starting spin animation');
     setSpinning(true);
     setStoppedReels(Array(REEL_COUNT).fill(false));
+
+    // Play spin sound
+    unlockAudio(); // Unlock audio on first interaction (mobile)
+    sounds.spin();
 
     // Generate new random symbols for each reel using weighted probabilities
     const newReels = Array(REEL_COUNT).fill(null).map(() =>
@@ -121,6 +133,9 @@ const SlotGame = ({ autoStart = false, onPennyWin, onPigJackpot, onLose }) => {
           // Remove spinning animation
           ref.classList.remove('spinning');
 
+          // Play reel stop sound
+          sounds.reelStop();
+
           // Calculate final position to center symbol at index 8 perfectly
           const finalTransform = 'translateY(-35%)';
 
@@ -150,12 +165,15 @@ const SlotGame = ({ autoStart = false, onPennyWin, onPigJackpot, onLose }) => {
 
   // Auto-start spin if autoStart prop is true (only once)
   useEffect(() => {
+    console.log('SlotGame: autoStart effect, autoStart:', autoStart, 'hasStarted:', hasStarted.current);
     if (autoStart && !hasStarted.current) {
       hasStarted.current = true;
-      const timer = setTimeout(() => {
+      console.log('SlotGame: Calling spin() directly');
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        console.log('SlotGame: RAF fired, calling spin()');
         spin();
-      }, 100);
-      return () => clearTimeout(timer);
+      });
     }
   }, [autoStart]);
 
