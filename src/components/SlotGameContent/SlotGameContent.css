@@ -10,6 +10,7 @@
 
 /* Start Screen - Before game starts */
 .slot-game-content.start-screen {
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   background-image: url('/textures/game2.png');
@@ -18,6 +19,44 @@
   background-repeat: no-repeat;
   border-radius: 10px;
   box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
+}
+
+/* Game Code Input Container */
+.game-code-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 6rem;
+}
+
+.game-code-input {
+  width: 100%;
+  padding: 1.2rem 2rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-align: center;
+  border: 4px solid #db8a93;
+  border-radius: 16px;
+  background: rgba(26, 10, 31, 0.8);
+  color: #ffd700;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow:
+    0 5px 20px rgba(0, 0, 0, 0.3),
+    inset 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.game-code-input::placeholder {
+  color: rgba(255, 215, 0, 0.5);
+  font-weight: 500;
+}
+
+.game-code-input:focus {
+  border-color: #ffd700;
+  box-shadow:
+    0 5px 25px rgba(255, 215, 0, 0.3),
+    0 0 20px rgba(219, 138, 147, 0.4),
+    inset 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Big SPIN Button - Gold/Pink theme matching slot machine */
@@ -45,7 +84,7 @@
   pointer-events: auto;
   z-index: 1000;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  margin-top: 8rem;
+  margin-top: 1rem;
 }
 
 .big-spin-button::before {
@@ -85,6 +124,37 @@
     0 10px 30px rgba(255, 215, 0, 0.5),
     0 0 30px rgba(219, 138, 147, 0.4),
     inset 0 -3px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Disabled State - Grayed out when no game code */
+.big-spin-button.disabled,
+.big-spin-button:disabled {
+  background: linear-gradient(145deg, #666, #555, #666);
+  color: #999;
+  border-color: #444;
+  cursor: not-allowed;
+  animation: none;
+  box-shadow:
+    0 5px 15px rgba(0, 0, 0, 0.3),
+    inset 0 -3px 10px rgba(0, 0, 0, 0.3),
+    inset 0 2px 5px rgba(255, 255, 255, 0.1);
+  text-shadow: none;
+  opacity: 0.7;
+}
+
+.big-spin-button.disabled:hover,
+.big-spin-button:disabled:hover {
+  transform: none;
+  box-shadow:
+    0 5px 15px rgba(0, 0, 0, 0.3),
+    inset 0 -3px 10px rgba(0, 0, 0, 0.3),
+    inset 0 2px 5px rgba(255, 255, 255, 0.1);
+  border-color: #444;
+}
+
+.big-spin-button.disabled::before,
+.big-spin-button:disabled::before {
+  display: none;
 }
 
 @keyframes pulse-glow-button {
@@ -175,6 +245,18 @@
 
 .slot-game-content.mobile.lost-screen {
   background-image: url('/textures/mobileLost.jpeg');
+}
+
+.slot-game-content.mobile .game-code-container {
+  margin-top: 4rem;
+}
+
+.slot-game-content.mobile .game-code-input {
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border-width: 2px;
 }
 
 .slot-game-content.mobile .big-spin-button {

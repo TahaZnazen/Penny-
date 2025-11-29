@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Float } from '@react-three/drei';
+import { OrbitControls, Float, Html } from '@react-three/drei';
 import { PiggyBank } from '../PiggyBank';
 import { Model } from '../SlotMachineModel';
 import TVScreenInGap from '../TVScreenInGap/TVScreenInGap';
@@ -23,17 +23,21 @@ import AmbientParticles from './AmbientParticles';
 const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) => {
   const modelRef = React.useRef();
   const groupRef = React.useRef();
-  const piggyGroupRef = React.useRef();
   const [jackpotTriggered, setJackpotTriggered] = React.useState(false);
   const [pennyWinTriggered, setPennyWinTriggered] = React.useState(false);
   const [showScreen, setShowScreen] = React.useState(true);
   const [piggyBroken, setPiggyBroken] = React.useState(false);
 
+  // Transition animation state
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+  const transitionStartTime = React.useRef(0);
+  const TRANSITION_DURATION = 1.5; // seconds
+
   // Drag-to-rotate state for piggy bank
   const [isDragging, setIsDragging] = React.useState(false);
   const [piggyRotation, setPiggyRotation] = React.useState(0);
   const lastX = React.useRef(0);
-  const { gl } = useThree();
+  const { gl, clock } = useThree();
 
   // Handle drag rotation for piggy
   React.useEffect(() => {
@@ -69,20 +73,44 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
     };
   }, [phase, isDragging, gl]);
 
-  // Intro animation for slot machine - slides up from bottom
+  // Animation for transition and slot machine
   useFrame((state) => {
-    if (phase === 'slot-machine' && groupRef.current) {
-      const elapsed = state.clock.elapsedTime;
+    const currentTime = state.clock.elapsedTime;
 
-      if (elapsed < 2) {
-        const progress = Math.min(elapsed / 2, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const startY = -10;
-        const endY = 0;
-        groupRef.current.position.set(0, startY + (endY - startY) * eased, 0);
-      } else {
-        groupRef.current.position.set(0, 0, 0);
+    // TRANSITION: Slot machine drops from top
+    if (isTransitioning && groupRef.current) {
+      const elapsed = currentTime - transitionStartTime.current;
+      const progress = Math.min(elapsed / TRANSITION_DURATION, 1);
+
+      // Ease out bounce for slot machine drop
+      const easeOutBounce = (t) => {
+        if (t < 1 / 2.75) {
+          return 7.5625 * t * t;
+        } else if (t < 2 / 2.75) {
+          return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+        } else if (t < 2.5 / 2.75) {
+          return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+        } else {
+          return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+        }
+      };
+
+      // Slot machine drops from top (y=10) to final position (y=0)
+      const slotY = 10 - 10 * easeOutBounce(progress);
+      groupRef.current.position.set(0, slotY, 0);
+
+      // Transition complete
+      if (progress >= 1) {
+        setIsTransitioning(false);
+        if (onPhaseChange) {
+          onPhaseChange('slot-machine');
+        }
       }
+    }
+
+    // Normal slot machine phase (after transition)
+    if (phase === 'slot-machine' && !isTransitioning && groupRef.current) {
+      groupRef.current.position.set(0, 0, 0);
     }
   });
 
@@ -91,12 +119,11 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
     setPiggyBroken(broken);
   };
 
-  // Handle coin click - transition to slot machine
+  // Handle coin click - start transition animation
   const handleCoinClick = () => {
-    console.log('Coin clicked! Transitioning to slot machine...');
-    if (onPhaseChange) {
-      onPhaseChange('slot-machine');
-    }
+    console.log('Coin clicked! Starting transition...');
+    transitionStartTime.current = clock.elapsedTime;
+    setIsTransitioning(true);
   };
 
   // Trigger explosion when jackpot (pig) happens
@@ -156,22 +183,74 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
       <AmbientParticles />
 
       {/* PIGGY PHASE: Show piggy bank with drag-to-rotate */}
-      {phase === 'piggy' && (
-        <group rotation={[0, piggyRotation, 0]}>
-          <Float floatIntensity={0} speed={0} position={[0, -0.8, 0]}>
-            <PiggyBank
-              scale={0.9}
-              setIsBroken={handlePiggyBroken}
-              initialBroken={false}
-              onCoinClick={handleCoinClick}
+      {phase === 'piggy' && !isTransitioning && (
+        <>
+          <group rotation={[0, piggyRotation, 0]}>
+            <Float floatIntensity={0} speed={0} position={[0, -0.8, 0]}>
+              <PiggyBank
+                scale={0.9}
+                setIsBroken={handlePiggyBroken}
+                initialBroken={false}
+                onCoinClick={handleCoinClick}
+              />
+            </Float>
+          </group>
+
+          {/* Instruction to click penny after piggy breaks */}
+          {piggyBroken && (
+            <Html center position={[0, 1.5, 0]} style={{ pointerEvents: 'none' }}>
+              <div style={{
+                background: 'rgba(0, 0, 0, 0.7)',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                border: '2px solid #ffd700',
+                animation: 'pulse 1.5s ease-in-out infinite',
+              }}>
+                <p style={{
+                  color: '#ffd700',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  margin: 0,
+                  textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+                  whiteSpace: 'nowrap',
+                }}>
+                  ✨ Click the Penny! ✨
+                </p>
+              </div>
+              <style>{`
+                @keyframes pulse {
+                  0%, 100% { transform: scale(1); opacity: 1; }
+                  50% { transform: scale(1.05); opacity: 0.9; }
+                }
+              `}</style>
+            </Html>
+          )}
+        </>
+      )}
+
+      {/* TRANSITION: Slot machine dropping from top */}
+      {isTransitioning && (
+        <group ref={groupRef} position={[0, 10, 0]}>
+          <Model
+            ref={modelRef}
+            position={[0, 0, 2.5]}
+            scale={1}
+            rotation={[0.2, 0, 0]}
+            castShadow
+            receiveShadow
+          />
+          {showScreen && (
+            <TVScreenInGap
+              onPennyWin={handlePennyWin}
+              onPigJackpot={handlePigJackpot}
             />
-          </Float>
+          )}
         </group>
       )}
 
-      {/* SLOT MACHINE PHASE: Show slot machine */}
-      {phase === 'slot-machine' && !pennyWinTriggered && (
-        <group ref={groupRef} position={[0, -10, 0]}>
+      {/* SLOT MACHINE PHASE: Show slot machine (after transition) */}
+      {phase === 'slot-machine' && !isTransitioning && !pennyWinTriggered && (
+        <group ref={groupRef} position={[0, 0, 0]}>
           {/* Slot Machine Model */}
           <Model
             ref={modelRef}

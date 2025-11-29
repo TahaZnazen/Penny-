@@ -233,6 +233,7 @@ export const PiggyBank = (props) => {
 
   // Track if we've already triggered the shatter
   const hasTriggeredShatter = useRef(false);
+  const setIsBrokenCallback = props?.setIsBroken;
 
   // Check if 20% threshold reached - consolidated logic to prevent race conditions
   useEffect(() => {
@@ -246,18 +247,26 @@ export const PiggyBank = (props) => {
       shatterTimerRef.current = setTimeout(() => {
         setAutoShatter(true);
         // Notify parent component
-        if (props?.setIsBroken) {
-          props.setIsBroken(true);
+        if (setIsBrokenCallback) {
+          setIsBrokenCallback(true);
         }
       }, 100);
     }
 
+    // Cleanup only clears timeout, but if sound played, we need to ensure shatter happens
     return () => {
       if (shatterTimerRef.current) {
         clearTimeout(shatterTimerRef.current);
+        // If shatter was triggered but timeout was cleared, force the shatter
+        if (hasTriggeredShatter.current && !autoShatter) {
+          setAutoShatter(true);
+          if (setIsBrokenCallback) {
+            setIsBrokenCallback(true);
+          }
+        }
       }
     };
-  }, [breakPercentage, autoShatter, props]);
+  }, [breakPercentage, autoShatter, setIsBrokenCallback]);
 
   const handlePieceClick = (index) => {
     if (!brokenPieces.has(index) && !autoShatter) {
@@ -268,10 +277,10 @@ export const PiggyBank = (props) => {
 
   // Notify parent component immediately if initially broken
   useEffect(() => {
-    if (initialBroken && props?.setIsBroken) {
-      props.setIsBroken(true);
+    if (initialBroken && setIsBrokenCallback) {
+      setIsBrokenCallback(true);
     }
-  }, [initialBroken, props]);
+  }, [initialBroken, setIsBrokenCallback]);
 
   // Calculate coin scale and position with smooth transition
   const coinScale =

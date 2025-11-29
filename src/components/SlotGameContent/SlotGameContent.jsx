@@ -70,19 +70,36 @@ const SlotGameContent = ({
   onLose,
   isMobile = false
 }) => {
+  const [gameCode, setGameCode] = React.useState('');
   const containerClass = isMobile ? 'slot-game-content mobile' : 'slot-game-content';
+
+  // Enable spin button only when game code is entered
+  const isSpinEnabled = gameCode.trim().length > 0;
 
   switch (gameState) {
     case 'idle':
       return (
         <div className={`${containerClass} start-screen`}>
+          <div className="game-code-container">
+            <input
+              type="text"
+              className="game-code-input"
+              placeholder="Enter Game Code"
+              value={gameCode}
+              onChange={(e) => setGameCode(e.target.value)}
+              autoComplete="off"
+            />
+          </div>
           <button
-            className="big-spin-button"
+            className={`big-spin-button ${!isSpinEnabled ? 'disabled' : ''}`}
+            disabled={!isSpinEnabled}
             onClick={() => {
+              if (!isSpinEnabled) return;
               console.log('SPIN button clicked!');
               if (onStartGame) onStartGame();
             }}
             onTouchEnd={(e) => {
+              if (!isSpinEnabled) return;
               e.preventDefault();
               console.log('SPIN button touched!');
               if (onStartGame) onStartGame();
