@@ -104,7 +104,7 @@ useGLTF.preload("/models/piggybank.glb");
 // Main PiggyBank component with all pieces
 export const PiggyBank = (props) => {
   const { nodes, materials } = useGLTF("/models/piggybank.glb");
-  const { initialBroken = false } = props;
+  const { initialBroken = false, onCoinClick } = props;
 
   // Initialize broken state from localStorage
   const [brokenPieces, setBrokenPieces] = useState(() => {
@@ -321,15 +321,28 @@ export const PiggyBank = (props) => {
         glowIntensity={glowIntensity * 30}
         scale={coinScale}
         position={[0, coinYPosition, 0]}
+        onClick={onCoinClick}
+        isClickable={autoShatter} // Only clickable after piggy is fully broken
       />
     </group>
   );
 };
 
-const PennyCoin = ({ glowIntensity = 1, position = [0, 0, 0], scale = 1 }) => {
+const PennyCoin = ({ glowIntensity = 1, position = [0, 0, 0], scale = 1, onClick, isClickable = false }) => {
   const coinRef = useRef();
   const currentScaleRef = useRef(scale);
   const currentPositionRef = useRef([...position]);
+  const [hovered, setHovered] = useState(false);
+
+  // Update cursor on hover when clickable
+  useEffect(() => {
+    if (hovered && isClickable) {
+      document.body.style.cursor = 'pointer';
+    }
+    return () => {
+      document.body.style.cursor = 'auto';
+    };
+  }, [hovered, isClickable]);
 
   // Smooth interpolation for scale and position using refs (not state!)
   useFrame(() => {
@@ -352,16 +365,31 @@ const PennyCoin = ({ glowIntensity = 1, position = [0, 0, 0], scale = 1 }) => {
 
   return (
     <group ref={coinRef} position={position} scale={scale}>
-      {/* Main coin body with gradient */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
+      {/* Main coin body with gradient - clickable */}
+      <mesh
+        rotation={[Math.PI / 2, 0, 0]}
+        onClick={(e) => {
+          if (isClickable && onClick) {
+            e.stopPropagation();
+            onClick();
+          }
+        }}
+        onPointerOver={(e) => {
+          if (isClickable) {
+            e.stopPropagation();
+            setHovered(true);
+          }
+        }}
+        onPointerOut={() => setHovered(false)}
+      >
         <cylinderGeometry args={[0.2, 0.2, 0.05, 32]} />
         <meshStandardMaterial
-         color="#ffd700"
-  metalness={0.3}
-  roughness={0.6}
-  flatShading={true}  // Consistent style
-  emissive="#ffaa00"
-  emissiveIntensity={0.4}
+          color={hovered && isClickable ? "#ffec80" : "#ffd700"}
+          metalness={0.3}
+          roughness={0.6}
+          flatShading={true}
+          emissive={hovered && isClickable ? "#ffcc00" : "#ffaa00"}
+          emissiveIntensity={hovered && isClickable ? 0.8 : 0.4}
         />
       </mesh>
 

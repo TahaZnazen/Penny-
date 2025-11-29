@@ -1,52 +1,52 @@
 import React from 'react';
 import { Cloud } from '@react-three/drei';
 
-const BottomClouds = () => {
-  // Hardcoded configuration
-  const controls = {
-    count: 45,
-    radius: 5.0,
-    yPosition: -24.1,
-    yRange: 3.9,
-    zPosition: -31.0,
-    segments: 80,
-    boundsX: 8.0,
-    boundsY: 3.0,
-    boundsZ: 9.0,
-    volume: 12.0,
-    opacity: 0.65,
-    speed: 0.50,
-    growth: 1.0,
-    fade: 21,
-    goldenRatio: 0.5,
-    whiteColor: '#ffffff',
-    goldenColor: '#ff8800',
-    scale: 2,
-  };
+// Static configuration - moved outside component to prevent re-renders
+const CLOUD_CONFIG = {
+  count: 18,
+  radius: 5.0,
+  yPosition: -24.1,
+  yRange: 3.9,
+  zPosition: -31.0,
+  segments: 40,
+  boundsX: 8.0,
+  boundsY: 3.0,
+  boundsZ: 9.0,
+  volume: 12.0,
+  opacity: 1,
+  speed: 0.20,
+  growth: 1.0,
+  fade: 21,
+  goldenRatio: 0.6,
+  whiteColor: '#ffffff',
+  goldenColor: '#ff8800',
+  scale: 2,
+};
 
-  // Create array of cloud configurations
+const BottomClouds = () => {
+  // Create array of cloud configurations - only computed once on mount
   const clouds = React.useMemo(() => {
-    return Array.from({ length: controls.count }, (_, i) => {
-      const angle = (i / controls.count) * Math.PI * 2;
-      const radius = controls.radius * 0.6 + Math.random() * controls.radius * 0.4;
-      const isGolden = Math.random() < controls.goldenRatio;
+    return Array.from({ length: CLOUD_CONFIG.count }, (_, i) => {
+      const angle = (i / CLOUD_CONFIG.count) * Math.PI * 2;
+      const radius = CLOUD_CONFIG.radius * 0.6 + Math.random() * CLOUD_CONFIG.radius * 0.4;
+      const isGolden = Math.random() < CLOUD_CONFIG.goldenRatio;
 
       return {
         position: [
           Math.cos(angle) * radius,
-          controls.yPosition + Math.random() * controls.yRange,
-          controls.zPosition + Math.sin(angle) * (radius * 0.4)
+          CLOUD_CONFIG.yPosition + Math.random() * CLOUD_CONFIG.yRange,
+          CLOUD_CONFIG.zPosition + Math.sin(angle) * (radius * 0.4)
         ],
         seed: i,
-        segments: controls.segments + Math.floor(Math.random() * 10),
-        bounds: [controls.boundsX, controls.boundsY, controls.boundsZ],
-        color: isGolden ? controls.goldenColor : controls.whiteColor,
-        opacity: controls.opacity * (0.8 + Math.random() * 0.2),
-        speed: controls.speed + Math.random() * controls.speed * 0.5,
-        scale:controls.scale,
+        segments: CLOUD_CONFIG.segments + Math.floor(Math.random() * 10),
+        bounds: [CLOUD_CONFIG.boundsX, CLOUD_CONFIG.boundsY, CLOUD_CONFIG.boundsZ],
+        color: isGolden ? CLOUD_CONFIG.goldenColor : CLOUD_CONFIG.whiteColor,
+        opacity: CLOUD_CONFIG.opacity * (0.8 + Math.random() * 0.2),
+        speed: CLOUD_CONFIG.speed + Math.random() * CLOUD_CONFIG.speed * 0.5,
+        scale: CLOUD_CONFIG.scale,
       };
     });
-  }, [controls]);
+  }, []);
 
   return (
     <group>
@@ -55,12 +55,12 @@ const BottomClouds = () => {
           {/* Base layer - wider, less opaque */}
           <Cloud
             seed={cloud.seed}
-            fade={controls.fade}
+            fade={CLOUD_CONFIG.fade}
             speed={cloud.speed}
-            growth={controls.growth}
+            growth={CLOUD_CONFIG.growth}
             segments={cloud.segments}
-            volume={controls.volume * 0.8}
-            opacity={cloud.opacity * 1}
+            volume={CLOUD_CONFIG.volume * 0.8}
+            opacity={cloud.opacity}
             bounds={cloud.bounds}
             color={cloud.color}
             scale={cloud.scale}

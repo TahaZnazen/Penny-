@@ -12,13 +12,11 @@ import "./Home.css";
 function Home() {
   const navigate = useNavigate();
   const [isCanvasReady, setIsCanvasReady] = useState(false);
-
-  // Check localStorage for broken state on mount
-  const [isBroken, setIsBroken] = useState(() => {
-    const saved = localStorage.getItem('piggyBankBroken');
-    return saved === 'true';
-  });
   const [isMuted, setIsMuted] = useState(false);
+
+  // Home always shows the broken state (coin + welcome overlay)
+  // Piggy breaking now happens on the slot machine page
+  const isBroken = true;
 
   // Mark canvas as ready after a brief moment to prevent black screen
   // Also preload slot machine images in background for instant loading
@@ -36,10 +34,6 @@ function Home() {
 
   const goToSlotMachine = () => {
     navigate('/slot-machine');
-  };
-
-  const handleBroken = (broken) => {
-    setIsBroken(broken);
   };
 
   return (
@@ -85,19 +79,13 @@ function Home() {
         </button>
       </div>
 
-      {/* Canvas */}
+      {/* Canvas - Shows only the penny coin (isBroken=true) */}
       <Canvas shadows camera={{ position: [4, 1, 4], fov: 35 }}>
-        <Experience setIsBroken={handleBroken} isBroken={isBroken} />
+        <Experience isBroken={isBroken} />
         <Preload all />
       </Canvas>
 
-      {/* UI Overlays */}
-      {!isBroken && (
-        <div className="click-message animate-in">
-          Click to Break <br /> the Piggy Bank!
-        </div>
-      )}
-
+      {/* Welcome Overlay - Always visible since isBroken is always true */}
       {isBroken && (
         <div className="welcome-overlay animate-in">
           <h1 className="welcome-title">Welcome To Penny!</h1>
