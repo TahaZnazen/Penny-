@@ -3,22 +3,25 @@ class AudioManager {
     this.breakSound = new Audio('/audios/break.mp3');
     this.finalSound = new Audio('/audios/final.mp3');
     this.chillSound = new Audio('/audios/chill.mp3');
-    // this.rainSound = new Audio('/audios/rain.mp3');
+    this.thunderSound = new Audio('/audios/thunder.mp3');
+    this.rainSound = new Audio('/audios/rain.mp3');
 
 
     // Preload audio
     this.breakSound.load();
     this.finalSound.load();
     this.chillSound.load();
-    // this.rainSound.load();
+    this.thunderSound.load();
+    this.rainSound.load();
 
     // Set volumes (adjust as needed)
     this.breakSound.volume = 0.5;
     this.finalSound.volume = 0.7;
-    // this.rainSound.volume = 0.3;
+    this.thunderSound.volume = 0.6;
+    this.rainSound.volume = 0.3;
 
     // Loop ambient sounds
-    // this.rainSound.loop = true;
+    this.rainSound.loop = true;
     this.chillSound.loop = true;
   }
 
@@ -48,19 +51,23 @@ class AudioManager {
   }
     muteChill(){
     this.chillSound.pause();
-
   }
 
-  // Rain ambient sound
-  // playRain() {
-  //   this.rainSound.currentTime = 0;
-  //   this.rainSound.play().catch(e => console.log('Rain audio play failed:', e));
-  // }
+  playThunder() {
+    this.thunderSound.currentTime = 0;
+    this.thunderSound.play().catch(e => console.log('Thunder audio play failed:', e));
+  }
 
-  // stopRain() {
-  //   this.rainSound.pause();
-  //   this.rainSound.currentTime = 0;
-  // }
+  playRain() {
+    if (this.rainSound.paused) {
+      this.rainSound.play().catch(e => console.log('Rain audio play failed:', e));
+    }
+  }
+
+  stopRain() {
+    this.rainSound.pause();
+    this.rainSound.currentTime = 0;
+  }
 
   // Background music (alias for playChill for clarity)
   playBackgroundMusic() {

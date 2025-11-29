@@ -6,10 +6,7 @@ import TVScreenInGap from '../TVScreenInGap/TVScreenInGap';
 import JackpotScreen from '../JackpotScreen/JackpotScreen';
 import BackgroundPlane from './BackgroundPlane';
 import BottomClouds from './BottomClouds';
-import TopClouds from './TopClouds';
 import AmbientParticles from './AmbientParticles';
-import EdgeClouds from './EdgeClouds';
-import * as THREE from 'three';
 import './SlotMachineView.css';
 
 const SlotMachineScene = ({ onJackpot, introComplete }) => {
@@ -49,14 +46,12 @@ const SlotMachineScene = ({ onJackpot, introComplete }) => {
   // Trigger explosion when jackpot happens
   React.useEffect(() => {
     if (jackpotTriggered && modelRef.current) {
-      console.log('🎰 JACKPOT! Triggering explosion...');
       modelRef.current.explode();
       setShowScreen(false); // Hide TV screen during explosion
     }
   }, [jackpotTriggered]);
 
   const handleJackpot = () => {
-    console.log('🎊 Jackpot detected in scene!');
     setJackpotTriggered(true);
 
     // Trigger parent jackpot screen
@@ -92,7 +87,6 @@ const SlotMachineScene = ({ onJackpot, introComplete }) => {
         position={[0, -0.8, 0]}
         receiveShadow
       >
-        {/* <planeGeometry args={[25, 50]} /> */}
         <shadowMaterial opacity={0.2} />
       </mesh>
 
@@ -119,10 +113,7 @@ const SlotMachineScene = ({ onJackpot, introComplete }) => {
         {/* Screen with SlotGame embedded in 3D space - hidden during explosion */}
         {showScreen && <TVScreenInGap onJackpot={handleJackpot} />}
 
-        {/* Floating clouds around the model edges */}
-        {/* <EdgeClouds count={30} /> */}
       </group>
-      {/* <TopClouds /> */}
 
       {/* Camera Controls - Disabled zoom and rotation */}
       <OrbitControls
@@ -149,11 +140,6 @@ const SlotMachineView = () => {
 
   const handleJackpot = () => {
     setShowJackpotScreen(true);
-
-    // Hide jackpot screen after 4 seconds
-    // setTimeout(() => {
-    //   setShowJackpotScreen(false);
-    // }, 4000);
   };
 
   return (

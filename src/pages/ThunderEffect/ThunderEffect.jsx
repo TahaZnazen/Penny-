@@ -1,297 +1,316 @@
-import React, { useState, useEffect, useMemo, Suspense } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, useGLTF } from '@react-three/drei';
+import { useState, useEffect, useRef, useMemo, Suspense } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Cloud } from '@react-three/drei';
 import { useNavigate } from 'react-router-dom';
-import { useControls } from 'leva';
-import StormClouds from './StormClouds';
-import BackgroundImage from './BackgroundImage';
-import RainEffect from './RainEffect';
+import { useLoading } from '../../contexts/LoadingContext';
+import { ThunderPiggyBank } from '../../components/ThunderPiggyBank';
+import { audioManager } from '../../utils/audioManager';
+import * as THREE from 'three';
 import './ThunderEffect.css';
 
-// Camera updater component - updates camera position when GUI changes
-const CameraUpdater = ({ cameraX, cameraY, cameraZ, fov }) => {
-  const { camera } = useThree();
+// Lightning bolt visual component - creates branching lightning
+const LightningBolt = ({ startPos, endPos, active, intensity = 1 }) => {
+  const lineRef = useRef();
+  const [points, setPoints] = useState([]);
+
+  // Generate jagged lightning path
+  const generateLightningPath = useMemo(() => {
+    return () => {
+      const pts = [];
+      const segments = 8;
+      const start = new THREE.Vector3(...startPos);
+      const end = new THREE.Vector3(...endPos);
+
+      for (let i = 0; i <= segments; i++) {
+        const t = i / segments;
+        const pos = new THREE.Vector3().lerpVectors(start, end, t);
+
+        // Add random offset for jagged effect (except start and end)
+        if (i > 0 && i < segments) {
+          pos.x += (Math.random() - 0.5) * 2;
+          pos.z += (Math.random() - 0.5) * 1;
+        }
+        pts.push(pos);
+      }
+      return pts;
+    };
+  }, [startPos, endPos]);
 
   useEffect(() => {
-    camera.position.set(cameraX, cameraY, cameraZ);
-    camera.fov = fov;
-    camera.updateProjectionMatrix();
-  }, [camera, cameraX, cameraY, cameraZ, fov]);
-
-  return null;
-};
-
-  
-// Lightning bolt component
-const LightningBolt = ({ active, position = [0, 5, 0], config }) => {
-  const [intensity, setIntensity] = useState(0);
+    if (active) {
+      setPoints(generateLightningPath());
+    }
+  }, [active, generateLightningPath]);
 
   useFrame(() => {
-    if (active) {
-      // Flash effect with configurable intensity
-      setIntensity(Math.random() * config.maxIntensity + config.minIntensity);
-    } else {
-      setIntensity(0);
+    if (lineRef.current && active) {
+      // Flicker effect
+      lineRef.current.material.opacity = 0.5 + Math.random() * 0.5;
+    }
+  });
+
+  if (!active || points.length === 0) return null;
+
+  return (
+    <group>
+      {/* Main bolt */}
+      <line ref={lineRef}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={points.length}
+            array={new Float32Array(points.flatMap(p => [p.x, p.y, p.z]))}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial
+          color="#a0c4ff"
+          transparent
+          opacity={1}
+          linewidth={3}
+        />
+      </line>
+
+      {/* Glow effect */}
+      <line>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={points.length}
+            array={new Float32Array(points.flatMap(p => [p.x, p.y, p.z]))}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial
+          color="#ffffff"
+          transparent
+          opacity={0.3}
+          linewidth={6}
+        />
+      </line>
+
+      {/* Point light at strike point */}
+      <pointLight
+        position={endPos}
+        intensity={intensity * 150}
+        color="#a0c4ff"
+        distance={30}
+        decay={2}
+      />
+    </group>
+  );
+};
+
+// Storm clouds at the top
+const StormClouds = () => {
+  const cloudData = useMemo(() => {
+    return Array.from({ length: 8 }, (_, i) => ({
+      position: [
+        (i - 4) * 4 + Math.random() * 2,
+        8 + Math.random() * 2,
+        -5 + Math.random() * 3
+      ],
+      speed: 0.1 + Math.random() * 0.1,
+      opacity: 0.6 + Math.random() * 0.3,
+    }));
+  }, []);
+
+  return (
+    <group>
+      {cloudData.map((cloud, i) => (
+        <Cloud
+          key={i}
+          position={cloud.position}
+          speed={cloud.speed}
+          opacity={cloud.opacity}
+          color="#2c3e50"
+          segments={40}
+          bounds={[6, 2, 3]}
+          volume={8}
+          fade={30}
+        />
+      ))}
+    </group>
+  );
+};
+
+// Main Thunder Scene
+const ThunderScene = ({ lightningActive, shouldBreakPiggy, onPiggyBroken }) => {
+  const lightRef = useRef();
+
+  // Flash light on lightning
+  useFrame(() => {
+    if (lightRef.current) {
+      lightRef.current.intensity = lightningActive ? 5 + Math.random() * 5 : 0.3;
     }
   });
 
   return (
     <>
-      <pointLight
-        position={position}
-        intensity={intensity}
-        color={config.color}
-        distance={config.distance}
-        decay={config.decay}
-      />
-      <pointLight
-        position={[position[0], position[1] - 2, position[2]]}
-        intensity={intensity * 0.5}
-        color="#ffffff"
-        distance={config.distance * 0.6}
-      />
-    </>
-  );
-};
+      {/* Ambient light */}
+      <ambientLight intensity={0.1} />
 
-// Thunder scene
-const ThunderScene = ({ thunderActive, canvasControls, showControls = true }) => {
-  // Lighting controls
-  const lightingControls = useControls('Lighting', {
-    ambientIntensityInactive: { value: 0.15, min: 0, max: 2, step: 0.05, label: 'Ambient (Inactive)' },
-    ambientIntensityActive: { value: 0.8, min: 0, max: 2, step: 0.05, label: 'Ambient (Active)' },
-    directionalIntensityInactive: { value: 0.3, min: 0, max: 2, step: 0.05, label: 'Directional (Inactive)' },
-    directionalIntensityActive: { value: 2.0, min: 0, max: 5, step: 0.1, label: 'Directional (Active)' },
-    directionalPosition: { value: [10, 10, 5], label: 'Directional Position' },
-  });
-
-  // Lightning controls
-  const lightningControls = useControls('Lightning', {
-    minIntensity: { value: 5, min: 0, max: 20, step: 1, label: 'Min Intensity' },
-    maxIntensity: { value: 15, min: 5, max: 30, step: 1, label: 'Max Intensity' },
-    color: { value: '#a0c4ff', label: 'Lightning Color' },
-    distance: { value: 50, min: 10, max: 100, step: 5, label: 'Light Distance' },
-    decay: { value: 2, min: 0, max: 5, step: 0.1, label: 'Light Decay' },
-    boltCount: { value: 5, min: 1, max: 10, step: 1, label: 'Bolt Count' },
-  });
-
-  // Target model controls (Piggy Bank)
-  const targetControls = useControls('Target Model', {
-    positionX: { value: 0.0, min: -20, max: 20, step: 0.5, label: 'X Position' },
-    positionY: { value: 3.5, min: -50, max: 10, step: 0.5, label: 'Y Position' },
-    positionZ: { value: 0, min: -20, max: 20, step: 0.5, label: 'Z Position' },
-    scale: { value: 6.9, min: 0.1, max: 10, step: 0.1, label: 'Scale' },
-    rotationX: { value: 0, min: -Math.PI, max: Math.PI, step: 0.1, label: 'Rotation X' },
-    rotationY: { value: 0.5, min: -Math.PI, max: Math.PI, step: 0.1, label: 'Rotation Y' },
-    rotationZ: { value: 0, min: -Math.PI, max: Math.PI, step: 0.1, label: 'Rotation Z' },
-  });
-
-  // Pillar offset controls (relative to piggy bank)
-  const pillarOffsets = useControls('Pillar Offsets', {
-    rotationXMultiplier: { value: 5, min: 0, max: 10, step: 0.5, label: 'Rotation X Multiplier' },
-    rotationY: { value: -2.3, min: -Math.PI, max: Math.PI, step: 0.1, label: 'Rotation Y' },
-    rotationZMultiplier: { value: 1, min: 0, max: 10, step: 0.5, label: 'Rotation Z Multiplier' },
-    positionYMultiplier: { value: -2.5, min: -5, max: 5, step: 0.1, label: 'Y Position Multiplier' },
-    scale: { value: 20, min: 0.1, max: 50, step: 0.5, label: 'Scale' },
-  });
-
-  // Camera controls
-  const cameraControls = useControls('Camera', {
-    minDistance: { value: 10, min: 1, max: 20, step: 1, label: 'Min Distance' },
-    maxDistance: { value: 50, min: 20, max: 100, step: 5, label: 'Max Distance' },
-    maxPolarAngle: { value: Math.PI / 2, min: 0, max: Math.PI, step: 0.1, label: 'Max Polar Angle' },
-  });
-
-  // Generate lightning bolt positions - positioned above clouds to strike downward
-  const lightningBolts = React.useMemo(() => {
-    return Array.from({ length: lightningControls.boltCount }, (_, i) => {
-      const angle = (i / lightningControls.boltCount) * Math.PI * 2;
-      const radius = 2 + Math.random() * 2;
-      return {
-        position: [
-          Math.cos(angle) * radius,
-          18 + Math.random() * 3,  // Above clouds (clouds are at Y: 15-18)
-          Math.sin(angle) * radius
-        ]
-      };
-    });
-  }, [lightningControls.boltCount]);
-
-  return (
-    <>
-      {/* Camera updater - syncs camera with GUI controls */}
-      <CameraUpdater
-        cameraX={canvasControls.cameraX}
-        cameraY={canvasControls.cameraY}
-        cameraZ={canvasControls.cameraZ}
-        fov={canvasControls.fov}
-      />
-
-      {/* Ambient lighting */}
-      <ambientLight
-        intensity={thunderActive ? lightingControls.ambientIntensityActive : lightingControls.ambientIntensityInactive}
-      />
-
-      {/* Main directional light */}
+      {/* Flash light */}
       <directionalLight
-        position={lightingControls.directionalPosition}
-        intensity={thunderActive ? lightingControls.directionalIntensityActive : lightingControls.directionalIntensityInactive}
-        color="#ffffff"
+        ref={lightRef}
+        position={[0, 10, 5]}
+        intensity={0.3}
+        color="#a0c4ff"
       />
 
-      {/* Background, Rain, and Storm clouds - wrapped together to load simultaneously */}
+      {/* Storm clouds at top */}
       <Suspense fallback={null}>
-        <BackgroundImage thunderActive={thunderActive} />
-        <RainEffect />
-        <StormClouds thunderActive={thunderActive} />
+        <StormClouds />
       </Suspense>
 
-      {/* Lightning bolts at different positions */}
-      {lightningBolts.map((bolt, i) => (
-        <LightningBolt
-          key={i}
-          active={thunderActive}
-          position={bolt.position}
-          config={lightningControls}
-        />
-      ))}
-
-      {/* Pillar (under piggy bank) */}
-      {/* <Pillar
-        position={[
-          targetControls.positionX,
-          targetControls.positionY * pillarOffsets.positionYMultiplier,
-          targetControls.positionZ
-        ]}
-        scale={pillarOffsets.scale}
-        rotation={[
-          targetControls.rotationX * pillarOffsets.rotationXMultiplier,
-          pillarOffsets.rotationY,
-          targetControls.rotationZ * pillarOffsets.rotationZMultiplier
-        ]}
-      /> */}
-
-      {/* Piggy Bank Target Model */}
-      {/* <PiggyBankTarget
-        position={[targetControls.positionX-0.5, targetControls.positionY, targetControls.positionZ]}
-        scale={targetControls.scale}
-        rotation={[targetControls.rotationX, targetControls.rotationY, targetControls.rotationZ]}
-      /> */}
-
-      {/* Camera controls */}
-      <OrbitControls
-        target={[canvasControls.targetX, canvasControls.targetY, canvasControls.targetZ]}
-        enableZoom={false}
-        enableRotate={showControls}
-        enablePan={showControls}
-        minDistance={cameraControls.minDistance}
-        maxDistance={cameraControls.maxDistance}
-        maxPolarAngle={cameraControls.maxPolarAngle}
+      {/* Lightning bolts - strike center bottom */}
+      <LightningBolt
+        startPos={[-2, 7, 0]}
+        endPos={[0, -2, 0]}
+        active={lightningActive}
+        intensity={1}
       />
+      <LightningBolt
+        startPos={[2, 8, -1]}
+        endPos={[0, -2, 0]}
+        active={lightningActive}
+        intensity={0.7}
+      />
+
+      {/* ThunderPiggyBank - breaks after 5 scrolls, no click */}
+      <Suspense fallback={null}>
+        <ThunderPiggyBank
+          position={[0, -3, 0]}
+          scale={2.5}
+          shouldBreak={shouldBreakPiggy}
+          onBroken={onPiggyBroken}
+        />
+      </Suspense>
     </>
   );
 };
 
 const ThunderEffect = ({
-  showControls = true,
   onScrollComplete = null,
   useNavigation = true
 }) => {
   const navigate = useNavigation ? useNavigate() : null;
-  const [thunderActive, setThunderActive] = useState(false);
+  const { isLoaded, loadingProgress } = useLoading();
+  const [lightningActive, setLightningActive] = useState(false);
   const [scrollCount, setScrollCount] = useState(0);
-  const [isCompleting, setIsCompleting] = useState(false);
+  const [shouldBreakPiggy, setShouldBreakPiggy] = useState(false);
+  const [showStartButton, setShowStartButton] = useState(false);
 
-  // Canvas controls - only show when showControls is true
-  const canvasControls = showControls ? useControls('Canvas', {
-    cameraX: { value: 0, min: -50, max: 150, step: 1, label: 'Camera X' },
-    cameraY: { value: 0, min: -10, max: 140, step: 1, label: 'Camera Y' },
-    cameraZ: { value: 11, min: -50, max: 150, step: 1, label: 'Camera Z' },
-    fov: { value: 75, min: 30, max: 120, step: 5, label: 'Field of View' },
-    targetX: { value: 0, min: -50, max: 50, step: 1, label: 'Look At X' },
-    targetY: { value: 13, min: -10, max: 30, step: 1, label: 'Look At Y' },
-    targetZ: { value: 0, min: -50, max: 50, step: 1, label: 'Look At Z' },
-  }) : {
-    cameraX: 0,
-    cameraY: 0,
-    cameraZ: 11,
-    fov: 75,
-    targetX: 0,
-    targetY: 13,
-    targetZ: 0
-  };
-
-  // Trigger thunder on scroll
-  const triggerThunder = () => {
-    setThunderActive(true);
-    setTimeout(() => setThunderActive(false), 300);
-  };
-
-  // Handle scroll event
+  // Play rain ambient on mount, stop on unmount
   useEffect(() => {
-    let scrollTimeout;
-
-    const handleScroll = () => {
-      // Clear existing timeout
-      clearTimeout(scrollTimeout);
-
-      // Trigger thunder
-      triggerThunder();
-
-      // Increment scroll count after a delay (debounce)
-      scrollTimeout = setTimeout(() => {
-        setScrollCount(prev => {
-          const newCount = prev + 1;
-
-          // After 5 scrolls, either call callback or navigate
-          if (newCount >= 5) {
-            if (onScrollComplete) {
-              // Loader mode: trigger fade-out then callback
-              setIsCompleting(true);
-              setTimeout(() => {
-                onScrollComplete();
-              }, 1000); // Match fade-out duration
-            } else if (useNavigation && navigate) {
-              // Route mode: navigate to home
-              navigate('/');
-            }
-          }
-
-          return newCount;
-        });
-      }, 500);
-    };
-
-    window.addEventListener('wheel', handleScroll);
-
+    audioManager.playRain();
     return () => {
-      window.removeEventListener('wheel', handleScroll);
-      clearTimeout(scrollTimeout);
+      audioManager.stopRain();
     };
-  }, [navigate, onScrollComplete, useNavigation]);
+  }, []);
+
+  // Trigger lightning on scroll
+  const triggerLightning = () => {
+    setLightningActive(true);
+    audioManager.playThunder();
+    setTimeout(() => setLightningActive(false), 150);
+  };
+
+  // Handle piggy broken callback - show start button
+  const handlePiggyBroken = () => {
+    setShowStartButton(true);
+  };
+
+  // Handle Start Experience button click
+  const handleStartExperience = () => {
+    audioManager.playChill();
+    if (onScrollComplete) {
+      onScrollComplete();
+    } else if (useNavigation && navigate) {
+      navigate('/home');
+    }
+  };
+
+  // Handle click event
+  const handleClick = () => {
+    triggerLightning();
+
+    // Only count clicks after assets loaded and piggy not yet broken
+    if (!isLoaded || shouldBreakPiggy) return;
+
+    setScrollCount(prev => {
+      const newCount = prev + 1;
+
+      // Break piggy on 5th click
+      if (newCount >= 5 && !shouldBreakPiggy) {
+        triggerLightning();
+        setShouldBreakPiggy(true);
+      }
+
+      return Math.min(newCount, 5);
+    });
+  };
+
+  // Display text
+  const getDisplayText = () => {
+    if (!isLoaded) return `Loading... ${loadingProgress}%`;
+    if (showStartButton) return '';
+    return `⚡ Tap anywhere to strike! (${scrollCount}/5)`;
+  };
 
   return (
-    <div className={`thunder-effect-container  `}>
-      {/* Sky background that flashes */}
-      <div className={`sky-background ${thunderActive ? 'flash' : ''}`} />
+    <div className="thunder-effect-container" onClick={handleClick}>
+      {/* CSS Rain overlay */}
+      <div className="rain-container">
+        {[...Array(100)].map((_, i) => (
+          <div key={i} className="rain-drop" style={{
+            left: `${Math.random() * 100}%`,
+            animationDuration: `${0.5 + Math.random() * 0.3}s`,
+            animationDelay: `${Math.random() * 2}s`,
+          }} />
+        ))}
+      </div>
 
-      {/* 3D Thunder Scene */}
       <Canvas
-        shadows
-        camera={{
-          position: [canvasControls.cameraX, canvasControls.cameraY, canvasControls.cameraZ],
-          fov: canvasControls.fov
-        }}
+        camera={{ position: [0, 0, 12], fov: 60 }}
         style={{ width: '100%', height: '100%' }}
+        gl={{ alpha: true }}
+        
       >
-        <ThunderScene thunderActive={thunderActive} canvasControls={canvasControls} showControls={showControls} />
+        <ThunderScene
+          lightningActive={lightningActive}
+          shouldBreakPiggy={shouldBreakPiggy}
+          onPiggyBroken={handlePiggyBroken}
+        />
       </Canvas>
 
-      {/* Scroll counter display */}
+      {/* UI Overlay */}
       <div className="thunder-controls">
-        <div className="scroll-counter">
-          Scroll {scrollCount}/5 times to continue
-        </div>
+        {!showStartButton && (
+          <>
+            <div className="scroll-counter">
+              {getDisplayText()}
+            </div>
+            {!isLoaded && (
+              <div className="loading-bar">
+                <div
+                  className="loading-bar-fill"
+                  style={{ width: `${loadingProgress}%` }}
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Start Experience Button - appears after piggy breaks */}
+        {showStartButton && (
+          <button
+            className="start-experience-button"
+            onClick={handleStartExperience}
+          >
+            Start Experience
+          </button>
+        )}
       </div>
     </div>
   );

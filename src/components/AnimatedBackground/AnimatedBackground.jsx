@@ -1,7 +1,6 @@
 import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useControls } from 'leva';
 import './AnimatedBackground.css';
 
 // Simplex noise function for shader
@@ -41,10 +40,10 @@ const noiseShader = `
 const PortalCloudShader = {
   uniforms: {
     time: { value: 0 },
-    color1: { value: new THREE.Color('#1a0a00') }, // Dark brown/black
-    color2: { value: new THREE.Color('#2d1810') }, // Brown
-    color3: { value: new THREE.Color('#ff8c00') }, // Orange
-    color4: { value: new THREE.Color('#ffd700') }, // Gold
+    color1: { value: new THREE.Color('#1a0a00') },
+    color2: { value: new THREE.Color('#2d1810') },
+    color3: { value: new THREE.Color('#ff8c00') },
+    color4: { value: new THREE.Color('#ffd700') },
     intensity: { value: 1.5 },
     speed: { value: 1.0 },
   },
@@ -74,48 +73,35 @@ const PortalCloudShader = {
 
     void main() {
       vec2 uv = vUv;
-
-      // Center-based coordinates
       vec2 center = uv - 0.5;
       float dist = length(center);
       float angle = atan(center.y, center.x);
 
-      // Swirling effect - rotate UV based on distance and time
       float swirl = dist * 3.0 + time * speed * 0.2;
       vec2 swirlUv = vec2(
         center.x * cos(swirl) - center.y * sin(swirl),
         center.x * sin(swirl) + center.y * cos(swirl)
       ) + 0.5;
 
-      // Multi-octave noise for cloud detail
       float noise1 = snoise(swirlUv * 3.0 + time * speed * 0.1);
       float noise2 = snoise(swirlUv * 6.0 - time * speed * 0.15);
       float noise3 = snoise(swirlUv * 12.0 + time * speed * 0.05);
 
-      // Combine noise octaves
       float combinedNoise = noise1 * 0.5 + noise2 * 0.3 + noise3 * 0.2;
-
-      // Radial gradient - bright center, dark edges
       float radialGradient = 1.0 - smoothstep(0.0, 0.8, dist);
-
-      // Vortex effect - stronger swirl near center
       float vortexMask = smoothstep(0.6, 0.0, dist);
 
-      // Combine effects with sharper definition
       float cloudMask = combinedNoise * 0.6 + 0.4;
-      cloudMask = pow(cloudMask, 0.8); // Sharpen the contrast
+      cloudMask = pow(cloudMask, 0.8);
       cloudMask *= radialGradient;
 
-      // Color mixing based on distance from center
       vec3 darkColor = mix(color1, color2, cloudMask);
       vec3 brightColor = mix(color3, color4, vortexMask);
       vec3 finalColor = mix(darkColor, brightColor, radialGradient * intensity);
 
-      // Add glow in center with more definition
       float glow = pow(1.0 - dist, 2.5) * intensity;
       finalColor += color4 * glow * 0.6;
 
-      // Less aggressive edge fade for clearer edges
       float edgeFade = smoothstep(0.95, 0.4, dist);
 
       gl_FragColor = vec4(finalColor, cloudMask * edgeFade);
@@ -123,38 +109,46 @@ const PortalCloudShader = {
   `,
 };
 
+// Static configuration (previously Leva controls)
+const CONFIG = {
+  cloudSpeed: 1.0,
+  cloudIntensity: 1.5,
+  cloudSize: 30,
+  cloudPositionZ: -5,
+  ambientIntensity: 0.2,
+  light1Intensity: 3,
+  light1PositionZ: -3,
+  light2Intensity: 2,
+  light2PositionZ: -4,
+  color1: '#1a0a00',
+  color2: '#2d1810',
+  color3: '#ff8c00',
+  color4: '#ffd700',
+};
+
 // Portal Cloud Component
-const PortalCloud = ({
-  speed = 1.0,
-  intensity = 1.5,
-  size = 30,
-  positionZ = -5,
-  color1 = '#1a0a00',
-  color2 = '#2d1810',
-  color3 = '#ff8c00',
-  color4 = '#ffd700'
-}) => {
+const PortalCloud = () => {
   const meshRef = useRef();
   const materialRef = useRef();
 
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.time.value = state.clock.elapsedTime;
-      materialRef.current.uniforms.intensity.value = intensity;
-      materialRef.current.uniforms.speed.value = speed;
-      materialRef.current.uniforms.color1.value = new THREE.Color(color1);
-      materialRef.current.uniforms.color2.value = new THREE.Color(color2);
-      materialRef.current.uniforms.color3.value = new THREE.Color(color3);
-      materialRef.current.uniforms.color4.value = new THREE.Color(color4);
+      materialRef.current.uniforms.intensity.value = CONFIG.cloudIntensity;
+      materialRef.current.uniforms.speed.value = CONFIG.cloudSpeed;
+      materialRef.current.uniforms.color1.value.set(CONFIG.color1);
+      materialRef.current.uniforms.color2.value.set(CONFIG.color2);
+      materialRef.current.uniforms.color3.value.set(CONFIG.color3);
+      materialRef.current.uniforms.color4.value.set(CONFIG.color4);
     }
     if (meshRef.current) {
-      meshRef.current.rotation.z = state.clock.elapsedTime * speed * 0.05;
+      meshRef.current.rotation.z = state.clock.elapsedTime * CONFIG.cloudSpeed * 0.05;
     }
   });
 
   return (
-    <mesh ref={meshRef} position={[0, 0, positionZ]}>
-      <planeGeometry args={[size, size, 64, 64]} />
+    <mesh ref={meshRef} position={[0, 0, CONFIG.cloudPositionZ]}>
+      <planeGeometry args={[CONFIG.cloudSize, CONFIG.cloudSize, 64, 64]} />
       <shaderMaterial
         ref={materialRef}
         args={[PortalCloudShader]}
@@ -167,72 +161,30 @@ const PortalCloud = ({
   );
 };
 
-// Main Portal Scene with Leva Controls
+// Main Portal Scene
 const PortalScene = () => {
-  const controls = useControls('Portal Controls', {
-    // Cloud Settings
-    cloudSpeed: { value: 1.0, min: 0, max: 3, step: 0.1, label: 'Cloud Speed' },
-    cloudIntensity: { value: 1.5, min: 0, max: 5, step: 0.1, label: 'Cloud Intensity' },
-    cloudSize: { value: 30, min: 10, max: 50, step: 1, label: 'Cloud Size' },
-    cloudPositionZ: { value: -5, min: -20, max: 0, step: 0.5, label: 'Cloud Z Position' },
-
-    // Lighting
-    ambientIntensity: { value: 0.2, min: 0, max: 2, step: 0.1, label: 'Ambient Light' },
-    light1Intensity: { value: 3, min: 0, max: 10, step: 0.5, label: 'Gold Light Intensity' },
-    light1PositionZ: { value: -3, min: -10, max: 5, step: 0.5, label: 'Gold Light Z' },
-    light2Intensity: { value: 2, min: 0, max: 10, step: 0.5, label: 'Orange Light Intensity' },
-    light2PositionZ: { value: -4, min: -10, max: 5, step: 0.5, label: 'Orange Light Z' },
-
-    // Colors
-    color1: { value: '#1a0a00', label: 'Color 1 (Dark)' },
-    color2: { value: '#2d1810', label: 'Color 2 (Brown)' },
-    color3: { value: '#ff8c00', label: 'Color 3 (Orange)' },
-    color4: { value: '#ffd700', label: 'Color 4 (Gold)' },
-  });
-
   return (
     <>
-      {/* Ambient lighting */}
-      <ambientLight intensity={controls.ambientIntensity} />
-
-      {/* Center point lights for illumination */}
+      <ambientLight intensity={CONFIG.ambientIntensity} />
       <pointLight
-        position={[0, 0, controls.light1PositionZ]}
-        intensity={controls.light1Intensity}
+        position={[0, 0, CONFIG.light1PositionZ]}
+        intensity={CONFIG.light1Intensity}
         color="#ffd700"
         distance={20}
         decay={2}
       />
       <pointLight
-        position={[0, 0, controls.light2PositionZ]}
-        intensity={controls.light2Intensity}
+        position={[0, 0, CONFIG.light2PositionZ]}
+        intensity={CONFIG.light2Intensity}
         color="#ff8c00"
         distance={15}
         decay={2}
       />
-
-      {/* Portal cloud effect */}
-      <PortalCloud
-        speed={controls.cloudSpeed}
-        intensity={controls.cloudIntensity}
-        size={controls.cloudSize}
-        positionZ={controls.cloudPositionZ}
-        color1={controls.color1}
-        color2={controls.color2}
-        color3={controls.color3}
-        color4={controls.color4}
-      />
+      <PortalCloud />
     </>
   );
 };
 
-/**
- * AnimatedBackground - Majestic Golden Portal Effect
- *
- * A celestial portal with swirling dark clouds and golden glow
- * Compatible with @react-three/fiber v8.x - uses native Three.js materials for glow effects
- * Includes Leva GUI for real-time parameter control
- */
 const AnimatedBackground = () => {
   return (
     <div className="animated-background">

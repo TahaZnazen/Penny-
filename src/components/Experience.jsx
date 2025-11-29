@@ -10,7 +10,7 @@ import { Suspense, useEffect } from "react";
 import { PiggyBank } from "./PiggyBank";
 import { useThree } from "@react-three/fiber";
 
-export const Experience = ({ setIsbroken, isBroken }) => {
+export const Experience = ({ setIsBroken, isBroken }) => {
   const backgroundTexture = useTexture("/textures/bg.png");
   const { viewport } = useThree();
 
@@ -52,7 +52,7 @@ export const Experience = ({ setIsbroken, isBroken }) => {
       />
       
       <Float floatIntensity={0} speed={0} position={[0, -0.8, 0]}>
-        <PiggyBank scale={0.9} setIsbroken={setIsbroken} initialBroken={isBroken} />
+        <PiggyBank scale={0.9} setIsBroken={setIsBroken} initialBroken={isBroken} />
       </Float>
       
       <ContactShadows

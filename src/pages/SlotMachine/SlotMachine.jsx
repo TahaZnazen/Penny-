@@ -1,14 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import AnimatedBackground from '../../components/AnimatedBackground/AnimatedBackground';
 import SlotMachineView from '../../components/SlotMachineView/SlotMachineView';
 import SlotGame from '../../components/SlotGame/SlotGame';
 import './SlotMachine.css';
 
-const SlotMachine = ({ isEmbedded = false }) => {
+const SlotMachine = () => {
   const navigate = useNavigate();
 
   const handleBackClick = () => {
-      navigate('/');
+      navigate('/home');
   };
 
   return (

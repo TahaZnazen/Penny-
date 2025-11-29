@@ -11,7 +11,7 @@ import "./Home.css";
 function Home() {
   const navigate = useNavigate();
   // Check localStorage for broken state on mount
-  const [isBroken, setIsbroken] = useState(() => {
+  const [isBroken, setIsBroken] = useState(() => {
     const saved = localStorage.getItem('piggyBankBroken');
     return saved === 'true';
   });
@@ -27,13 +27,8 @@ function Home() {
     navigate('/slot-machine');
   };
 
-  // Save broken state to localStorage whenever it changes
   const handleBroken = (broken) => {
-    setIsbroken(broken);
-    // if (broken) {
-    //   localStorage.setItem('piggyBankBroken', 'true');
-    //   console.log('💾 Saved piggy bank broken state to localStorage');
-    // }
+    setIsBroken(broken);
   };
 
   return (
@@ -74,7 +69,7 @@ function Home() {
 
       {/* Canvas */}
       <Canvas shadows camera={{ position: [4, 1, 4], fov: 35 }}>
-        <Experience setIsbroken={handleBroken} isBroken={isBroken} />
+        <Experience setIsBroken={handleBroken} isBroken={isBroken} />
         <Preload all />
       </Canvas>
 

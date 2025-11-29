@@ -246,8 +246,8 @@ export const PiggyBank = (props) => {
       shatterTimerRef.current = setTimeout(() => {
         setAutoShatter(true);
         // Notify parent component
-        if (props?.setIsbroken) {
-          props.setIsbroken(true);
+        if (props?.setIsBroken) {
+          props.setIsBroken(true);
         }
       }, 100);
     }
@@ -268,8 +268,8 @@ export const PiggyBank = (props) => {
 
   // Notify parent component immediately if initially broken
   useEffect(() => {
-    if (initialBroken && props?.setIsbroken) {
-      props.setIsbroken(true);
+    if (initialBroken && props?.setIsBroken) {
+      props.setIsBroken(true);
     }
   }, [initialBroken, props]);
 
