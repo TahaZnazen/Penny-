@@ -6,6 +6,7 @@ import { audioManager } from "../../utils/audioManager";
 import { FaTelegram } from "react-icons/fa";
 import { PiXLogoBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
+import { preloadImages } from "../../utils/preloadImages";
 import "./Home.css";
 
 function Home() {
@@ -20,8 +21,10 @@ function Home() {
   const [isMuted, setIsMuted] = useState(false);
 
   // Mark canvas as ready after a brief moment to prevent black screen
+  // Also preload slot machine images in background for instant loading
   useEffect(() => {
     const timer = setTimeout(() => setIsCanvasReady(true), 100);
+    preloadImages(); // Preload slot machine assets in background
     return () => clearTimeout(timer);
   }, []);
 

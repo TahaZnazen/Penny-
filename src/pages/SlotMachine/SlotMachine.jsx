@@ -1,9 +1,16 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SlotMachineView from '../../components/SlotMachineView/SlotMachineView';
+import { preloadImages } from '../../utils/preloadImages';
 import './SlotMachine.css';
 
 const SlotMachine = () => {
   const navigate = useNavigate();
+
+  // Preload all game images immediately
+  useEffect(() => {
+    preloadImages();
+  }, []);
 
   const handleBackClick = () => {
       navigate('/home');
