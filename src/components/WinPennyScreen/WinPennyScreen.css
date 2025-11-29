@@ -1,0 +1,341 @@
+/* Penny Win Overlay - Full Screen */
+.penny-win-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999999;
+  pointer-events: none;
+  animation: penny-fade-in 0.5s ease-out;
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.85) 100%);
+}
+
+.penny-win-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Animated Background Circles */
+.penny-bg-circles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.penny-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: penny-circle-pulse 2s ease-in-out infinite;
+}
+
+.penny-circle-1 {
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.8), transparent);
+  animation-delay: 0s;
+}
+
+.penny-circle-2 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 180, 0, 0.6), transparent);
+  animation-delay: 0.3s;
+}
+
+.penny-circle-3 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255, 200, 100, 0.4), transparent);
+  animation-delay: 0.6s;
+}
+
+/* Main Win Text */
+.penny-main-text {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  animation: penny-text-appear 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.penny-title {
+  font-size: clamp(4rem, 15vw, 12rem);
+  font-weight: 900;
+  margin: 0;
+  background: linear-gradient(
+    45deg,
+    #ffd700,
+    #ffed4e,
+    #ffd700,
+    #ffa500,
+    #ffd700
+  );
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation:
+    penny-gradient 3s ease infinite,
+    penny-bounce 0.6s ease-in-out 0.2s;
+  text-shadow:
+    0 0 30px rgba(255, 215, 0, 0.8),
+    0 0 60px rgba(255, 215, 0, 0.6),
+    0 0 90px rgba(255, 215, 0, 0.4);
+  letter-spacing: 0.1em;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
+.penny-subtitle {
+  font-size: clamp(2rem, 6vw, 5rem);
+  font-weight: 700;
+  color: #fff;
+  margin-top: 1rem;
+  text-shadow:
+    0 0 20px rgba(255, 215, 0, 0.8),
+    0 0 40px rgba(255, 215, 0, 0.6),
+    0 5px 15px rgba(0, 0, 0, 0.5);
+  animation: penny-glow 1.5s ease-in-out infinite;
+  letter-spacing: 0.2em;
+}
+
+.penny-reward-info {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.penny-reward-amount {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow:
+    0 0 20px rgba(255, 215, 0, 0.8),
+    0 5px 15px rgba(0, 0, 0, 0.5);
+  margin-bottom: 1rem;
+}
+
+.penny-instruction {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  color: #ccc;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.penny-code {
+  display: inline-block;
+  background: rgba(255, 215, 0, 0.2);
+  border: 2px solid #ffd700;
+  border-radius: 10px;
+  padding: 0.8rem 2rem;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: #ffd700;
+  letter-spacing: 0.3em;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  animation: code-glow 2s ease-in-out infinite;
+}
+
+@keyframes code-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+  }
+}
+
+.penny-coins {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  animation: penny-coins-bounce 1s ease-in-out infinite;
+}
+
+.penny-coin {
+  width: clamp(40px, 8vw, 80px);
+  height: clamp(40px, 8vw, 80px);
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+  animation: penny-coin-spin 2s linear infinite;
+}
+
+.penny-coin:nth-child(1) { animation-delay: 0s; }
+.penny-coin:nth-child(2) { animation-delay: 0.1s; }
+.penny-coin:nth-child(3) { animation-delay: 0.2s; }
+.penny-coin:nth-child(4) { animation-delay: 0.3s; }
+.penny-coin:nth-child(5) { animation-delay: 0.4s; }
+
+/* Particles */
+.penny-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.penny-particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(135deg, #ffd700, #ffa500);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  animation: penny-particle-float 3s ease-in-out infinite;
+}
+
+/* Distribute particles randomly */
+.penny-particle-0 { left: 10%; animation-delay: 0s; }
+.penny-particle-1 { left: 15%; animation-delay: 0.2s; }
+.penny-particle-2 { left: 20%; animation-delay: 0.4s; }
+.penny-particle-3 { left: 25%; animation-delay: 0.1s; }
+.penny-particle-4 { left: 30%; animation-delay: 0.6s; }
+.penny-particle-5 { left: 35%; animation-delay: 0.3s; }
+.penny-particle-6 { left: 40%; animation-delay: 0.8s; }
+.penny-particle-7 { left: 45%; animation-delay: 0.5s; }
+.penny-particle-8 { left: 50%; animation-delay: 0.7s; }
+.penny-particle-9 { left: 55%; animation-delay: 0.2s; }
+.penny-particle-10 { left: 60%; animation-delay: 0.9s; }
+.penny-particle-11 { left: 65%; animation-delay: 0.4s; }
+.penny-particle-12 { left: 70%; animation-delay: 0.6s; }
+.penny-particle-13 { left: 75%; animation-delay: 0.1s; }
+.penny-particle-14 { left: 80%; animation-delay: 0.8s; }
+.penny-particle-15 { left: 85%; animation-delay: 0.3s; }
+.penny-particle-16 { left: 90%; animation-delay: 0.5s; }
+.penny-particle-17 { left: 12%; animation-delay: 0.7s; }
+.penny-particle-18 { left: 22%; animation-delay: 0.9s; }
+.penny-particle-19 { left: 88%; animation-delay: 0.2s; }
+
+/* Rays of Light */
+.penny-rays {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: penny-rays-rotate 20s linear infinite;
+}
+
+.penny-ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 50%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 215, 0, 0.8),
+    rgba(255, 215, 0, 0.3),
+    transparent
+  );
+  transform-origin: top center;
+  filter: blur(2px);
+}
+
+.penny-ray-0 { transform: rotate(0deg); }
+.penny-ray-1 { transform: rotate(30deg); }
+.penny-ray-2 { transform: rotate(60deg); }
+.penny-ray-3 { transform: rotate(90deg); }
+.penny-ray-4 { transform: rotate(120deg); }
+.penny-ray-5 { transform: rotate(150deg); }
+.penny-ray-6 { transform: rotate(180deg); }
+.penny-ray-7 { transform: rotate(210deg); }
+.penny-ray-8 { transform: rotate(240deg); }
+.penny-ray-9 { transform: rotate(270deg); }
+.penny-ray-10 { transform: rotate(300deg); }
+.penny-ray-11 { transform: rotate(330deg); }
+
+/* Animations */
+@keyframes penny-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes penny-text-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes penny-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes penny-glow {
+  0%, 100% {
+    text-shadow:
+      0 0 20px rgba(255, 215, 0, 0.8),
+      0 0 40px rgba(255, 215, 0, 0.6),
+      0 5px 15px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    text-shadow:
+      0 0 30px rgba(255, 235, 100, 1),
+      0 0 60px rgba(255, 235, 100, 0.8),
+      0 5px 20px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@keyframes penny-coins-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes penny-coin-spin {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+@keyframes penny-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes penny-circle-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0.6;
+  }
+}
+
+@keyframes penny-particle-float {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% {
+    transform: translateY(-100px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes penny-rays-rotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}

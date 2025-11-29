@@ -5,9 +5,10 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 9999;
+  z-index: 9999999;
   pointer-events: none;
   animation: jackpot-fade-in 0.5s ease-out;
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.85) 100%);
 }
 
 .jackpot-content {
@@ -42,21 +43,21 @@
 .circle-1 {
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(255, 215, 0, 0.8), transparent);
+  background: radial-gradient(circle, rgba(255, 105, 180, 0.8), transparent);
   animation-delay: 0s;
 }
 
 .circle-2 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(255, 107, 107, 0.6), transparent);
+  background: radial-gradient(circle, rgba(255, 20, 147, 0.6), transparent);
   animation-delay: 0.3s;
 }
 
 .circle-3 {
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(219, 138, 147, 0.4), transparent);
+  background: radial-gradient(circle, rgba(255, 182, 193, 0.4), transparent);
   animation-delay: 0.6s;
 }
 
@@ -74,11 +75,11 @@
   margin: 0;
   background: linear-gradient(
     45deg,
-    #ffd700,
-    #ffed4e,
-    #ffd700,
-    #ff6b6b,
-    #ffd700
+    #ff69b4,
+    #ff1493,
+    #ff69b4,
+    #db7093,
+    #ff69b4
   );
   background-size: 400% 400%;
   -webkit-background-clip: text;
@@ -88,9 +89,9 @@
     rainbow-gradient 3s ease infinite,
     jackpot-bounce 0.6s ease-in-out 0.2s;
   text-shadow:
-    0 0 30px rgba(255, 215, 0, 0.8),
-    0 0 60px rgba(255, 215, 0, 0.6),
-    0 0 90px rgba(255, 215, 0, 0.4);
+    0 0 30px rgba(255, 105, 180, 0.8),
+    0 0 60px rgba(255, 105, 180, 0.6),
+    0 0 90px rgba(255, 105, 180, 0.4);
   letter-spacing: 0.1em;
   filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
 }
@@ -101,18 +102,71 @@
   color: #fff;
   margin-top: 1rem;
   text-shadow:
-    0 0 20px rgba(255, 107, 107, 0.8),
-    0 0 40px rgba(255, 107, 107, 0.6),
+    0 0 20px rgba(255, 105, 180, 0.8),
+    0 0 40px rgba(255, 105, 180, 0.6),
     0 5px 15px rgba(0, 0, 0, 0.5);
   animation: jackpot-glow 1.5s ease-in-out infinite;
   letter-spacing: 0.2em;
 }
 
-.jackpot-pennies {
-  font-size: clamp(3rem, 8vw, 6rem);
+.jackpot-pigs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
   margin-top: 2rem;
   animation: pennies-bounce 1s ease-in-out infinite;
+}
+
+.jackpot-pig-img {
+  width: clamp(40px, 8vw, 80px);
+  height: clamp(40px, 8vw, 80px);
   filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+}
+
+.jackpot-reward-info {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.jackpot-reward-amount {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  font-weight: 700;
+  color: #ff69b4;
+  text-shadow:
+    0 0 20px rgba(255, 105, 180, 0.8),
+    0 5px 15px rgba(0, 0, 0, 0.5);
+  margin-bottom: 1rem;
+}
+
+.jackpot-instruction {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  color: #ccc;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.jackpot-code {
+  display: inline-block;
+  background: rgba(255, 105, 180, 0.2);
+  border: 2px solid #ff69b4;
+  border-radius: 10px;
+  padding: 0.8rem 2rem;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: #ff69b4;
+  letter-spacing: 0.3em;
+  text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+  animation: jackpot-code-glow 2s ease-in-out infinite;
+}
+
+@keyframes jackpot-code-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 105, 180, 0.8);
+  }
 }
 
 /* Particles */
@@ -129,9 +183,9 @@
   position: absolute;
   width: 10px;
   height: 10px;
-  background: linear-gradient(135deg, #ffd700, #ff6b6b);
+  background: linear-gradient(135deg, #ff69b4, #ff1493);
   border-radius: 50%;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  box-shadow: 0 0 10px rgba(255, 105, 180, 0.8);
   animation: particle-float 3s ease-in-out infinite;
 }
 
@@ -176,8 +230,8 @@
   height: 50%;
   background: linear-gradient(
     to bottom,
-    rgba(255, 215, 0, 0.8),
-    rgba(255, 215, 0, 0.3),
+    rgba(255, 105, 180, 0.8),
+    rgba(255, 105, 180, 0.3),
     transparent
   );
   transform-origin: top center;
@@ -230,14 +284,14 @@
 @keyframes jackpot-glow {
   0%, 100% {
     text-shadow:
-      0 0 20px rgba(255, 107, 107, 0.8),
-      0 0 40px rgba(255, 107, 107, 0.6),
+      0 0 20px rgba(255, 105, 180, 0.8),
+      0 0 40px rgba(255, 105, 180, 0.6),
       0 5px 15px rgba(0, 0, 0, 0.5);
   }
   50% {
     text-shadow:
-      0 0 30px rgba(255, 215, 0, 1),
-      0 0 60px rgba(255, 215, 0, 0.8),
+      0 0 30px rgba(255, 182, 193, 1),
+      0 0 60px rgba(255, 182, 193, 0.8),
       0 5px 20px rgba(0, 0, 0, 0.5);
   }
 }

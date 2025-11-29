@@ -4,15 +4,17 @@ import { OrbitControls } from '@react-three/drei';
 import { Model } from '../SlotMachineModel';
 import TVScreenInGap from '../TVScreenInGap/TVScreenInGap';
 import JackpotScreen from '../JackpotScreen/JackpotScreen';
+import WinPennyScreen from '../WinPennyScreen/WinPennyScreen';
 import BackgroundPlane from './BackgroundPlane';
 import BottomClouds from './BottomClouds';
 import AmbientParticles from './AmbientParticles';
 import './SlotMachineView.css';
 
-const SlotMachineScene = ({ onJackpot, introComplete }) => {
+const SlotMachineScene = ({ onPennyWin, onPigJackpot, introComplete }) => {
   const modelRef = React.useRef();
   const groupRef = React.useRef();
   const [jackpotTriggered, setJackpotTriggered] = React.useState(false);
+  const [pennyWinTriggered, setPennyWinTriggered] = React.useState(false);
   const [showScreen, setShowScreen] = React.useState(true);
 
   // Intro animation - machine and screen slide up from bottom (pure translation, no scale)
@@ -43,7 +45,7 @@ const SlotMachineScene = ({ onJackpot, introComplete }) => {
     }
   });
 
-  // Trigger explosion when jackpot happens
+  // Trigger explosion when jackpot (pig) happens
   React.useEffect(() => {
     if (jackpotTriggered && modelRef.current) {
       modelRef.current.explode();
@@ -51,13 +53,18 @@ const SlotMachineScene = ({ onJackpot, introComplete }) => {
     }
   }, [jackpotTriggered]);
 
-  const handleJackpot = () => {
-    setJackpotTriggered(true);
+  const handlePennyWin = () => {
+    // Penny win - hide machine, no explosion
+    console.log('SlotMachineScene: handlePennyWin called');
+    setPennyWinTriggered(true);
+    if (onPennyWin) onPennyWin();
+  };
 
+  const handlePigJackpot = () => {
+    console.log('SlotMachineScene: handlePigJackpot called');
+    setJackpotTriggered(true);
     // Trigger parent jackpot screen
-    if (onJackpot) {
-      onJackpot();
-    }
+    if (onPigJackpot) onPigJackpot();
   };
 
   return (
@@ -93,27 +100,32 @@ const SlotMachineScene = ({ onJackpot, introComplete }) => {
       {/* Bottom cloud layer - creates floating effect */}
       <BottomClouds />
 
-      {/* Top cloud layer - creates depth above the scene */}
-
       {/* Ambient sparkle particles throughout scene */}
       <AmbientParticles />
 
       {/* Animated group for machine and screen - they fly in together */}
-      <group ref={groupRef} position={[0 , 0 ,0]}>
-        {/* Slot Machine Model with explosion capability */}
-        <Model
-          ref={modelRef}
-          position={[0, 0, 2.5]}
-          scale={1}
-          rotation={[0.2, 0, 0]}
-          castShadow
-          receiveShadow
-        />
+      {/* Hide entire machine on penny win */}
+      {!pennyWinTriggered && (
+        <group ref={groupRef} position={[0, 0, 0]}>
+          {/* Slot Machine Model with explosion capability */}
+          <Model
+            ref={modelRef}
+            position={[0, 0, 2.5]}
+            scale={1}
+            rotation={[0.2, 0, 0]}
+            castShadow
+            receiveShadow
+          />
 
-        {/* Screen with SlotGame embedded in 3D space - hidden during explosion */}
-        {showScreen && <TVScreenInGap onJackpot={handleJackpot} />}
-
-      </group>
+          {/* Screen with SlotGame embedded in 3D space - hidden during explosion */}
+          {showScreen && (
+            <TVScreenInGap
+              onPennyWin={handlePennyWin}
+              onPigJackpot={handlePigJackpot}
+            />
+          )}
+        </group>
+      )}
 
       {/* Camera Controls - Disabled zoom and rotation */}
       <OrbitControls
@@ -127,6 +139,7 @@ const SlotMachineScene = ({ onJackpot, introComplete }) => {
 
 const SlotMachineView = () => {
   const [showJackpotScreen, setShowJackpotScreen] = React.useState(false);
+  const [showPennyWinScreen, setShowPennyWinScreen] = React.useState(false);
   const [introComplete, setIntroComplete] = React.useState(false);
 
   // Mark intro as complete after 3 seconds
@@ -138,23 +151,36 @@ const SlotMachineView = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleJackpot = () => {
+  const handlePennyWin = () => {
+    console.log('SlotMachineView: handlePennyWin called');
+    setShowPennyWinScreen(true);
+  };
+
+  const handlePigJackpot = () => {
+    console.log('SlotMachineView: handlePigJackpot called');
     setShowJackpotScreen(true);
   };
 
   return (
     <div className="slot-machine-view">
-      {/* Jackpot Win Screen Overlay */}
-      <JackpotScreen show={showJackpotScreen} />
-
       {/* 3D Slot Machine Model with integrated screen */}
       <Canvas
         shadows
         camera={{ position: [0, 0, 5], fov: 50 }}
         style={{ width: '100%', height: '100%' }}
       >
-        <SlotMachineScene onJackpot={handleJackpot} introComplete={introComplete} />
+        <SlotMachineScene
+          onPennyWin={handlePennyWin}
+          onPigJackpot={handlePigJackpot}
+          introComplete={introComplete}
+        />
       </Canvas>
+
+      {/* Jackpot Win Screen Overlay (all 5 pigs) */}
+      <JackpotScreen show={showJackpotScreen} />
+
+      {/* Penny Win Screen Overlay (all 5 pennies) */}
+      <WinPennyScreen show={showPennyWinScreen} />
     </div>
   );
 };

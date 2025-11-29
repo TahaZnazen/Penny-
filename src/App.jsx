@@ -52,31 +52,31 @@ const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
-    <AnimatePresence mode="wait">
+    // <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* Thunder is the entry/loading page */}
         <Route path="/" element={
-          <PageTransition>
+          // <PageTransition>
             <ThunderEffect />
-          </PageTransition>
+          // </PageTransition>
         } />
 
         {/* Main pages */}
         <Route path="/home" element={
-          <PageTransition>
+          // <PageTransition>
             <Home />
-          </PageTransition>
+          // </PageTransition>
         } />
         <Route path="/slot-machine" element={
-          <PageTransition>
+          // <PageTransition>
             <SlotMachine />
-          </PageTransition>
+           //</PageTransition>
         } />
 
         {/* Catch-all redirect to entry */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </AnimatePresence>
+    // </AnimatePresence>  
   );
 };
 
