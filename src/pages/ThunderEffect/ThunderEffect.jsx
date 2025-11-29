@@ -8,6 +8,21 @@ import { audioManager } from '../../utils/audioManager';
 import * as THREE from 'three';
 import './ThunderEffect.css';
 
+// Mobile detection hook
+const useIsMobile = (breakpoint = 768) => {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < breakpoint : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [breakpoint]);
+
+  return isMobile;
+};
+
 // Lightning bolt visual component - creates branching lightning
 const LightningBolt = ({ startPos, endPos, active, intensity = 1 }) => {
   const lineRef = useRef();
@@ -200,6 +215,7 @@ const ThunderEffect = ({
   const [scrollCount, setScrollCount] = useState(0);
   const [shouldBreakPiggy, setShouldBreakPiggy] = useState(false);
   const [showStartButton, setShowStartButton] = useState(false);
+  const isMobile = useIsMobile();
 
   // Play rain ambient on mount, stop on unmount
   useEffect(() => {
@@ -246,6 +262,10 @@ const ThunderEffect = ({
       if (newCount >= 5 && !shouldBreakPiggy) {
         triggerLightning();
         setShouldBreakPiggy(true);
+        // On mobile, show button immediately since no 3D piggy
+        if (isMobile) {
+          setShowStartButton(true);
+        }
       }
 
       return Math.min(newCount, 5);
@@ -259,8 +279,43 @@ const ThunderEffect = ({
     return `⚡ Tap anywhere to strike! (${scrollCount}/5)`;
   };
 
+  // Mobile: Simple loader + button experience
+  if (isMobile) {
+    return (
+      <div className="thunder-effect-container mobile-simple">
+        {/* Background image placeholder - replace with your image */}
+        <div className="mobile-background" />
+
+        {/* UI Overlay */}
+        <div className="thunder-controls">
+          {!isLoaded ? (
+            <>
+              <div className="scroll-counter">
+                Loading... {loadingProgress}%
+              </div>
+              <div className="loading-bar">
+                <div
+                  className="loading-bar-fill"
+                  style={{ width: `${loadingProgress}%` }}
+                />
+              </div>
+            </>
+          ) : (
+            <button
+              className="start-experience-button"
+              onClick={handleStartExperience}
+            >
+              Start Experience
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop: Full 3D thunder experience
   return (
-    <div className="thunder-effect-container" onClick={handleClick}>
+    <div className={`thunder-effect-container ${lightningActive ? 'lightning-flash' : ''}`} onClick={handleClick}>
       {/* CSS Rain overlay */}
       <div className="rain-container">
         {[...Array(100)].map((_, i) => (
@@ -276,7 +331,6 @@ const ThunderEffect = ({
         camera={{ position: [0, 0, 12], fov: 60 }}
         style={{ width: '100%', height: '100%' }}
         gl={{ alpha: true }}
-        
       >
         <ThunderScene
           lightningActive={lightningActive}

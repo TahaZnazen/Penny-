@@ -134,6 +134,55 @@
   }
 }
 
+/* Lightning flash effect for container */
+.thunder-effect-container.lightning-flash {
+  animation: screen-flash 0.15s ease-out;
+}
+
+@keyframes screen-flash {
+  0% { background-color: rgba(160, 196, 255, 0.3); }
+  50% { background-color: rgba(255, 255, 255, 0.2); }
+  100% { background-color: transparent; }
+}
+
+/* ==================== MOBILE STYLES ==================== */
+
+/* Mobile simple version - just loader + button */
+.thunder-effect-container.mobile-simple {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile background image placeholder */
+.mobile-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Replace this with your background image */
+  background-image: url('/textures/thunder-mobile-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Fallback gradient if image doesn't exist */
+  background-color: #0a0d12;
+}
+
+.thunder-effect-container.mobile-simple .thunder-controls {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .scroll-counter {
@@ -149,5 +198,10 @@
     padding: 0.8rem 2rem;
     font-size: 1rem;
     letter-spacing: 1px;
+  }
+
+  .rain-drop {
+    width: 1px;
+    height: 10px;
   }
 }
