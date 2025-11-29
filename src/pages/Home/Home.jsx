@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { Experience } from "../../components/Experience";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Preload } from "@react-three/drei";
 import { audioManager } from "../../utils/audioManager";
 import { FaTelegram } from "react-icons/fa";
@@ -10,12 +10,20 @@ import "./Home.css";
 
 function Home() {
   const navigate = useNavigate();
+  const [isCanvasReady, setIsCanvasReady] = useState(false);
+
   // Check localStorage for broken state on mount
   const [isBroken, setIsBroken] = useState(() => {
     const saved = localStorage.getItem('piggyBankBroken');
     return saved === 'true';
   });
   const [isMuted, setIsMuted] = useState(false);
+
+  // Mark canvas as ready after a brief moment to prevent black screen
+  useEffect(() => {
+    const timer = setTimeout(() => setIsCanvasReady(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const toggleMute = () => {
     const newMutedState = !isMuted;
@@ -33,6 +41,13 @@ function Home() {
 
   return (
     <div className="container">
+      {/* Brief loading overlay until canvas is ready */}
+      {!isCanvasReady && (
+        <div className="home-loading-overlay">
+          <div className="home-loading-spinner" />
+        </div>
+      )}
+
       {/* Mute Button */}
       <button
         className="mute-button"
@@ -115,7 +130,7 @@ function Home() {
               className="btn btn-try-luck"
               onClick={goToSlotMachine}
             >
-              <span>🎰 Try Your Luck with Penny 🎰</span>
+              <span> Try Your Luck with Penny  </span>
             </button>
 
             <div className="social-buttons">

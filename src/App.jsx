@@ -1,12 +1,23 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { Suspense, lazy } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Suspense, lazy, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 import { LoadingProvider } from "./contexts/LoadingContext";
 import ErrorBoundary from "./components/ErrorBoundary";
+import PageTransition from "./components/PageTransition";
 import ThunderEffect from "./pages/ThunderEffect/ThunderEffect";
 
 // Lazy load pages for code splitting
 const Home = lazy(() => import("./pages/Home/Home"));
 const SlotMachine = lazy(() => import("./pages/SlotMachine/SlotMachine"));
+
+// Preload components in the background after initial render
+const preloadComponents = () => {
+  // Preload Home after a short delay to not block initial render
+  setTimeout(() => {
+    import("./pages/Home/Home");
+    import("./pages/SlotMachine/SlotMachine");
+  }, 1000);
+};
 
 // Simple loading fallback (shows during lazy load)
 const PageLoader = () => (
@@ -36,23 +47,51 @@ const PageLoader = () => (
   </div>
 );
 
+// Animated Routes component
+const AnimatedRoutes = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        {/* Thunder is the entry/loading page */}
+        <Route path="/" element={
+          <PageTransition>
+            <ThunderEffect />
+          </PageTransition>
+        } />
+
+        {/* Main pages */}
+        <Route path="/home" element={
+          <PageTransition>
+            <Home />
+          </PageTransition>
+        } />
+        <Route path="/slot-machine" element={
+          <PageTransition>
+            <SlotMachine />
+          </PageTransition>
+        } />
+
+        {/* Catch-all redirect to entry */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
 function App() {
+  // Preload other pages in background after initial mount
+  useEffect(() => {
+    preloadComponents();
+  }, []);
+
   return (
     <ErrorBoundary>
       <LoadingProvider>
         <Router>
           <Suspense fallback={<PageLoader />}>
-            <Routes>
-              {/* Thunder is the entry/loading page */}
-              <Route path="/" element={<ThunderEffect />} />
-
-              {/* Main pages */}
-              <Route path="/home" element={<Home />} />
-              <Route path="/slot-machine" element={<SlotMachine />} />
-
-              {/* Catch-all redirect to entry */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <AnimatedRoutes />
           </Suspense>
         </Router>
       </LoadingProvider>

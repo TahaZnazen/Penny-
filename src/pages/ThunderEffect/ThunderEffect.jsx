@@ -222,7 +222,8 @@ const ThunderEffect = ({
   };
 
   // Handle Start Experience button click
-  const handleStartExperience = () => {
+  const handleStartExperience = (e) => {
+    e.stopPropagation(); // Prevent triggering container click
     audioManager.playChill();
     if (onScrollComplete) {
       onScrollComplete();
