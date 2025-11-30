@@ -115,19 +115,18 @@ export async function completeSpin(gameCode) {
     let result;
     let reels;
 
-    // 5% jackpot chance in dev mode (all 5 same)
+    const PENNY_INDEX = 0; // 'penny'
+    const PIG_INDEX = 1;   // 'pig'
+
+    // 5% jackpot chance in dev mode (all 5 PIGS)
     if (random < 0.05) {
       result = 'won_jackpot';
-      const symbol = Math.floor(Math.random() * SYMBOLS.length);
-      reels = Array(NUM_REELS).fill(symbol);
+      reels = Array(NUM_REELS).fill(PIG_INDEX); // 🐷🐷🐷🐷🐷
     }
-    // 15% penny win chance in dev mode (4 out of 5 same)
+    // 15% penny win chance in dev mode (all 5 PENNIES)
     else if (random < 0.20) {
       result = 'won_penny';
-      const symbol = Math.floor(Math.random() * SYMBOLS.length);
-      const other = (symbol + 1) % SYMBOLS.length;
-      reels = Array(NUM_REELS).fill(symbol);
-      reels[Math.floor(Math.random() * NUM_REELS)] = other;
+      reels = Array(NUM_REELS).fill(PENNY_INDEX); // 💰💰💰💰💰
     }
     // 80% lose
     else {

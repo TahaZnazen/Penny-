@@ -24,9 +24,21 @@ const corsHeaders = {
 const SYMBOLS = ['penny', 'pig', 'ass', 'cool', 'pepe', 'spit', 'trump', 'viking', 'cill']
 const NUM_REELS = 5
 
+// Winning symbol indices (IMPORTANT: these determine what symbols show for wins)
+const PENNY_INDEX = 0  // 'penny' at index 0 - for penny win (5 pennies)
+const PIG_INDEX = 1    // 'pig' at index 1 - for jackpot (5 pigs)
+
 // Win probabilities (adjust as needed)
-const JACKPOT_PROBABILITY = 0.01 // 1%
-const PENNY_WIN_PROBABILITY = 0.10 // 10%
+// For testing: 33% jackpot, 33% penny, 33% lose
+// For production: use 0.01 and 0.11
+const JACKPOT_PROBABILITY = 0.33  // 0-33% = Jackpot
+const PENNY_WIN_PROBABILITY = 0.66 // 33-66% = Penny (must be JACKPOT + desired penny %)
+
+// Auto-reset configuration
+const RESET_CYCLE_HOURS = 5        // Reset every 5 hours
+const JACKPOTS_PER_CYCLE = 2       // 2 jackpots available per cycle
+const PENNY_WINS_PER_CYCLE = 3     // 3 penny wins available per cycle
+
 serve(async (req:any) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -140,11 +152,39 @@ serve(async (req:any) => {
       }
 
       // Get global state
-      const { data: globalState } = await supabase
+      let { data: globalState } = await supabase
         .from('global_state')
         .select('*')
         .eq('id', 1)
         .single()
+
+      // ========== AUTO-RESET CHECK ==========
+      // Check if 5 hours have passed since last reset
+      const now = new Date()
+      const lastReset = globalState?.last_reset_at ? new Date(globalState.last_reset_at) : new Date(0)
+      const hoursSinceReset = (now.getTime() - lastReset.getTime()) / (1000 * 60 * 60)
+
+      if (hoursSinceReset >= RESET_CYCLE_HOURS) {
+        // Reset prizes for new cycle
+        const { data: resetState } = await supabase
+          .from('global_state')
+          .update({
+            jackpots_remaining: JACKPOTS_PER_CYCLE,
+            penny_wins_remaining: PENNY_WINS_PER_CYCLE,
+            last_reset_at: now.toISOString(),
+            total_spins_this_cycle: 0,
+            updated_at: now.toISOString()
+          })
+          .eq('id', 1)
+          .select()
+          .single()
+
+        if (resetState) {
+          globalState = resetState
+          console.log('Prizes reset for new cycle:', globalState)
+        }
+      }
+      // ========================================
 
       // Calculate result
       const random = Math.random()
@@ -152,29 +192,24 @@ serve(async (req:any) => {
       let reels: number[] = []
       const numSymbols = SYMBOLS.length // 9 symbols
 
-      // Check for jackpot (all 5 reels same)
-      if (random < JACKPOT_PROBABILITY && globalState?.jackpot_available) {
+      // Check for jackpot (all 5 PIGS)
+      if (random < JACKPOT_PROBABILITY && globalState?.jackpots_remaining > 0) {
         result = 'won_jackpot'
-        const jackpotSymbol = Math.floor(Math.random() * numSymbols)
-        reels = Array(NUM_REELS).fill(jackpotSymbol) // [same, same, same, same, same]
+        reels = Array(NUM_REELS).fill(PIG_INDEX) // [pig, pig, pig, pig, pig] 🐷🐷🐷🐷🐷
 
-        // Consume jackpot
+        // Decrement jackpots remaining
         await supabase
           .from('global_state')
-          .update({ jackpot_available: false, updated_at: new Date().toISOString() })
+          .update({
+            jackpots_remaining: globalState.jackpots_remaining - 1,
+            updated_at: new Date().toISOString()
+          })
           .eq('id', 1)
       }
-      // Check for penny win (4 out of 5 matching)
+      // Check for penny win (all 5 PENNIES)
       else if (random < PENNY_WIN_PROBABILITY && globalState?.penny_wins_remaining > 0) {
         result = 'won_penny'
-        const winSymbol = Math.floor(Math.random() * numSymbols)
-        // Pick a different symbol for the odd one out
-        const otherSymbol = (winSymbol + 1 + Math.floor(Math.random() * (numSymbols - 1))) % numSymbols
-        // Fill all with winning symbol
-        reels = Array(NUM_REELS).fill(winSymbol)
-        // Replace one random position with different symbol
-        const oddPosition = Math.floor(Math.random() * NUM_REELS)
-        reels[oddPosition] = otherSymbol
+        reels = Array(NUM_REELS).fill(PENNY_INDEX) // [penny, penny, penny, penny, penny] 💰💰💰💰💰
 
         // Decrement penny wins
         await supabase
