@@ -158,6 +158,23 @@ serve(async (req:any) => {
         .eq('id', 1)
         .single()
 
+      // If no global state exists, create default one
+      if (!globalState) {
+        const { data: newState } = await supabase
+          .from('global_state')
+          .upsert({
+            id: 1,
+            jackpots_remaining: JACKPOTS_PER_CYCLE,
+            penny_wins_remaining: PENNY_WINS_PER_CYCLE,
+            last_reset_at: new Date().toISOString(),
+            total_spins_this_cycle: 0,
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single()
+        globalState = newState
+      }
+
       // ========== AUTO-RESET CHECK ==========
       // Check if 5 hours have passed since last reset
       const now = new Date()
