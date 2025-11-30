@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import './SlotGame.css';
 import { sounds, preloadSounds, unlockAudio } from '../../utils/sounds';
+import { completeSpin } from '../../services/gameApi';
 
 // Define symbols with images and weights (higher weight = more common)
+// IMPORTANT: Order must match server's SYMBOLS array in spin/index.ts
 const SYMBOLS = [
   { id: 'penny', src: '/imgs/penny.png', alt: 'Penny', weight: 5 },
   { id: 'pig', src: '/imgs/pig.png', alt: 'pig', weight: 5 },
@@ -15,8 +17,13 @@ const SYMBOLS = [
   { id: 'cill', src: '/imgs/chill.png', alt: 'cill', weight: 12 },
 ];
 
+// Map symbol ID to index for quick lookup
+const SYMBOL_ID_TO_INDEX = {};
+SYMBOLS.forEach((s, i) => SYMBOL_ID_TO_INDEX[s.id] = i);
+
 const SPIN_DURATION = 3000; // 3 seconds
 const REEL_COUNT = 5;
+const FINAL_SYMBOL_INDEX = 8; // The visible "result" position in the reel
 
 // Function to select a random symbol based on weights
 const getWeightedRandomSymbol = () => {
@@ -35,11 +42,12 @@ const getWeightedRandomSymbol = () => {
 /**
  * SlotGame Component
  * @param {boolean} autoStart - Auto-start the spin when mounted
+ * @param {string} gameCode - Game code for server-side result
  * @param {Function} onPennyWin - Callback when all 5 pennies
  * @param {Function} onPigJackpot - Callback when all 5 pigs (jackpot)
  * @param {Function} onLose - Callback when player loses
  */
-const SlotGame = ({ autoStart = false, onPennyWin, onPigJackpot, onLose }) => {
+const SlotGame = ({ autoStart = false, gameCode, onPennyWin, onPigJackpot, onLose }) => {
   const [reels, setReels] = useState(
     Array(REEL_COUNT).fill(null).map(() =>
       Array(20).fill(null).map(() => getWeightedRandomSymbol())
@@ -49,6 +57,7 @@ const SlotGame = ({ autoStart = false, onPennyWin, onPigJackpot, onLose }) => {
   const [stoppedReels, setStoppedReels] = useState(Array(REEL_COUNT).fill(false));
   const reelRefs = useRef([]);
   const hasStarted = useRef(false); // Track if spin already started
+  const serverResult = useRef(null); // Store server result for after animation
 
   // Initialize reel refs and preload sounds
   useEffect(() => {
@@ -56,39 +65,54 @@ const SlotGame = ({ autoStart = false, onPennyWin, onPigJackpot, onLose }) => {
     preloadSounds();
   }, []);
 
-  const checkWin = (currentReels) => {
-    // Get the middle symbol from each reel (index 8)
-    const middleSymbols = currentReels.map(reel => reel[8]);
-    console.log('SlotGame: checkWin called, middle symbols:', middleSymbols.map(s => s.id));
+  // Generate reels with specific final symbols at position 8
+  const generateReelsWithFinalSymbols = (finalSymbolIds) => {
+    return Array(REEL_COUNT).fill(null).map((_, reelIndex) => {
+      const reelSymbols = Array(20).fill(null).map(() => getWeightedRandomSymbol());
+      // Set the final visible position (index 8) to the server's symbol
+      const finalSymbolId = finalSymbolIds[reelIndex];
+      const finalSymbolIndex = SYMBOL_ID_TO_INDEX[finalSymbolId];
+      if (finalSymbolIndex !== undefined) {
+        reelSymbols[FINAL_SYMBOL_INDEX] = SYMBOLS[finalSymbolIndex];
+      }
+      return reelSymbols;
+    });
+  };
 
-    // Check if all 5 symbols are the same
-    const allPennies = middleSymbols.every(symbol => symbol.id === 'penny');
-    const allPigs = middleSymbols.every(symbol => symbol.id === 'pig');
+  // Trigger callback based on stored server result
+  const handleSpinComplete = () => {
+    console.log('SlotGame: handleSpinComplete called, serverResult:', serverResult.current);
 
-    if (allPennies) {
-      // ALL 5 PENNIES - Penny Win!
-      console.log('SlotGame: All pennies - calling onPennyWin');
-      sounds.pennyWin();
-      if (onPennyWin) onPennyWin();
-    } else if (allPigs) {
-      // ALL 5 PIGS - JACKPOT!
-      console.log('SlotGame: All pigs - calling onPigJackpot');
+    if (!serverResult.current) {
+      console.error('SlotGame: No server result available');
+      sounds.lose();
+      if (onLose) onLose();
+      return;
+    }
+
+    const result = serverResult.current;
+
+    if (result.result === 'won_jackpot') {
+      console.log('SlotGame: Jackpot - calling onPigJackpot');
       sounds.jackpot();
       if (onPigJackpot) onPigJackpot();
+    } else if (result.result === 'won_penny') {
+      console.log('SlotGame: Penny win - calling onPennyWin');
+      sounds.pennyWin();
+      if (onPennyWin) onPennyWin();
     } else {
-      // Anything else is a loss
       console.log('SlotGame: Loss - calling onLose');
       sounds.lose();
       if (onLose) onLose();
     }
   };
 
-  const spin = () => {
+  const spin = async () => {
     console.log('SlotGame: spin() called, spinning:', spinning);
     console.log('SlotGame: reelRefs.current:', reelRefs.current);
     if (spinning) return;
 
-    console.log('SlotGame: Starting spin animation');
+    console.log('SlotGame: Starting spin - fetching server result first');
     setSpinning(true);
     setStoppedReels(Array(REEL_COUNT).fill(false));
 
@@ -96,11 +120,24 @@ const SlotGame = ({ autoStart = false, onPennyWin, onPigJackpot, onLose }) => {
     unlockAudio(); // Unlock audio on first interaction (mobile)
     sounds.spin();
 
-    // Generate new random symbols for each reel using weighted probabilities
-    const newReels = Array(REEL_COUNT).fill(null).map(() =>
-      Array(20).fill(null).map(() => getWeightedRandomSymbol())
-    );
-    setReels(newReels);
+    // Fetch result from server FIRST (before animation completes)
+    try {
+      const result = await completeSpin(gameCode);
+      console.log('SlotGame: Server result received:', result);
+      serverResult.current = result;
+
+      // Generate reels with the server's final symbols at position 8
+      const newReels = generateReelsWithFinalSymbols(result.symbols);
+      setReels(newReels);
+    } catch (error) {
+      console.error('SlotGame: Error fetching result:', error);
+      serverResult.current = { result: 'lost', symbols: [], error: error.message };
+      // Generate random reels on error
+      const newReels = Array(REEL_COUNT).fill(null).map(() =>
+        Array(20).fill(null).map(() => getWeightedRandomSymbol())
+      );
+      setReels(newReels);
+    }
 
     // Start all reels spinning
     reelRefs.current.forEach((ref) => {
@@ -155,11 +192,11 @@ const SlotGame = ({ autoStart = false, onPennyWin, onPigJackpot, onLose }) => {
       }
     });
 
-    // Check result after all reels stop
+    // Get result from server after all reels stop
     const totalDuration = SPIN_DURATION + (REEL_COUNT * 400) + 800;
     setTimeout(() => {
       setSpinning(false);
-      checkWin(newReels);
+      handleSpinComplete();
     }, totalDuration + 200);
   };
 

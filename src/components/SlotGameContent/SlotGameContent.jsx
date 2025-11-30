@@ -1,6 +1,7 @@
 import React from 'react';
 import TVScreen from '../TVScreen/TVScreen';
 import SlotGame from '../SlotGame/SlotGame';
+import { validateGameCode, startSpin, isDevMode } from '../../services/gameApi';
 import './SlotGameContent.css';
 
 /**
@@ -71,10 +72,51 @@ const SlotGameContent = ({
   isMobile = false
 }) => {
   const [gameCode, setGameCode] = React.useState('');
+  const [activeGameCode, setActiveGameCode] = React.useState(''); // Code being used for current spin
+  const [isValidating, setIsValidating] = React.useState(false);
+  const [validationError, setValidationError] = React.useState('');
   const containerClass = isMobile ? 'slot-game-content mobile' : 'slot-game-content';
 
-  // Enable spin button only when game code is entered
-  const isSpinEnabled = gameCode.trim().length > 0;
+  // Enable spin button only when game code is entered and not validating
+  const isSpinEnabled = gameCode.trim().length > 0 && !isValidating;
+
+  // Handle spin button click with validation
+  const handleSpinClick = async () => {
+    if (!isSpinEnabled) return;
+
+    setIsValidating(true);
+    setValidationError('');
+
+    try {
+      // Validate the game code
+      const validation = await validateGameCode(gameCode);
+
+      if (!validation.valid) {
+        setValidationError(validation.error || 'Invalid code');
+        setIsValidating(false);
+        return;
+      }
+
+      // Start the spin session
+      const spinResult = await startSpin(gameCode);
+
+      if (!spinResult.success) {
+        setValidationError(spinResult.error || 'Failed to start');
+        setIsValidating(false);
+        return;
+      }
+
+      // Code is valid, store active code and start the game
+      console.log('Game code validated! Starting game...');
+      setActiveGameCode(gameCode);
+      if (onStartGame) onStartGame(gameCode);
+    } catch (error) {
+      console.error('Spin validation error:', error);
+      setValidationError('Connection error. Try again.');
+    }
+
+    setIsValidating(false);
+  };
 
   switch (gameState) {
     case 'idle':
@@ -84,28 +126,30 @@ const SlotGameContent = ({
             <input
               type="text"
               className="game-code-input"
-              placeholder="Enter Game Code"
+              placeholder={isDevMode ? "DEV MODE: Any code works" : "Enter Game Code"}
               value={gameCode}
-              onChange={(e) => setGameCode(e.target.value)}
+              onChange={(e) => {
+                setGameCode(e.target.value.toUpperCase());
+                setValidationError(''); // Clear error on input change
+              }}
               autoComplete="off"
+              disabled={isValidating}
             />
+            {validationError && (
+              <div className="validation-error">{validationError}</div>
+            )}
           </div>
           <button
             className={`big-spin-button ${!isSpinEnabled ? 'disabled' : ''}`}
             disabled={!isSpinEnabled}
-            onClick={() => {
-              if (!isSpinEnabled) return;
-              console.log('SPIN button clicked!');
-              if (onStartGame) onStartGame();
-            }}
+            onClick={handleSpinClick}
             onTouchEnd={(e) => {
               if (!isSpinEnabled) return;
               e.preventDefault();
-              console.log('SPIN button touched!');
-              if (onStartGame) onStartGame();
+              handleSpinClick();
             }}
           >
-            SPIN
+            {isValidating ? 'VALIDATING...' : 'SPIN'}
           </button>
         </div>
       );
@@ -116,6 +160,7 @@ const SlotGameContent = ({
           <TVScreen>
             <SlotGame
               autoStart={true}
+              gameCode={activeGameCode}
               onPennyWin={onPennyWin}
               onPigJackpot={onPigJackpot}
               onLose={onLose}
