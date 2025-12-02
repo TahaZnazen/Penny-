@@ -10,25 +10,28 @@ const LoadingContext = createContext({
 // All assets to preload
 const PRELOAD_MODELS = [
   '/models/piggybank.glb',
-  '/models/slotmachine.glb',
+  '/models/slotMachine2.glb',  // New slot machine model
+  // '/models/slotmachine.glb', // Old model (keeping for reference)
 ];
 
 const PRELOAD_TEXTURES = [
   '/textures/bg.png',
   '/textures/bg0.png',
-   '/textures/game2.png',
+   '/textures/game2.PNG',
 ];
 
 const PRELOAD_IMAGES = [
   '/imgs/penny.png',
-  '/imgs/ass.png',
-  '/imgs/cool.png',
-  '/imgs/pepe.png',
   '/imgs/pig.png',
-  '/imgs/spit.png',
-  '/imgs/trump.png',
-  '/imgs/viking.png',
-  '/imgs/chill.png',
+  '/imgs/1.PNG',
+  '/imgs/2.PNG',
+  '/imgs/3.PNG',
+  '/imgs/4.PNG',
+  '/imgs/5.PNG',
+  '/imgs/6.PNG',
+  '/imgs/7.PNG',
+  '/imgs/8.PNG',
+  '/imgs/9.PNG',
 ];
 
 // Preload GLB models

@@ -22,7 +22,7 @@ const TVScreenInGap = ({ onPennyWin, onPigJackpot }) => {
 
   return (
     <group
-      position={[0, 0, -0.2]}
+      position={[-0.12, -.1, -0.2]}
       rotation={[0, 0, 0]}
       scale={0.7}
     >

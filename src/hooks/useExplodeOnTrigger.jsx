@@ -40,6 +40,13 @@ export const useExplodeOnTrigger = (
       mesh.originalPosition = mesh.position.clone();
       mesh.originalRotation = mesh.rotation.clone();
 
+      // Set initial visibility: only show origin, hide cells
+      if (mesh.name === "origin") {
+        mesh.visible = true;
+      } else {
+        mesh.visible = false;
+      }
+
       // Calculate direction from center to this piece
       const meshWorldPosition = new THREE.Vector3();
       mesh.getWorldPosition(meshWorldPosition);
@@ -93,11 +100,12 @@ export const useExplodeOnTrigger = (
 
     // Animate each piece
     group.current.children.forEach((mesh) => {
-      // Hide "origin" mesh during explosion, show cells
+      // Toggle visibility: origin visible when NOT exploding, cells visible when exploding
       if (mesh.name === "origin") {
         mesh.visible = !isExploding;
       } else {
-        mesh.visible = true;
+        // Cell pieces only visible during explosion
+        mesh.visible = isExploding;
       }
 
       // Only animate if we have targets

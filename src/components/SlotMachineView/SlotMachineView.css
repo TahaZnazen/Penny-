@@ -7,7 +7,12 @@
   height: 100%;
   z-index: 10; /* Above the animated background */
   animation: fadeIn 1s ease-in;
-}
+  /* Center mobile content */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+ }
 
 @keyframes fadeIn {
   from {
@@ -16,4 +21,13 @@
   to {
     opacity: 1;
   }
+}
+
+
+@media only screen and (max-width : 768px) {
+    .slot-machine-view {
+        background-image: url('/textures/mobileBg.jpeg');
+  background-position: center   ;
+  background-size: cover;
+    }
 }

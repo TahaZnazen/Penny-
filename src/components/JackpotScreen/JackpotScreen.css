@@ -8,7 +8,7 @@
   z-index: 9999999;
   pointer-events: none;
   animation: jackpot-fade-in 0.5s ease-out;
-  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.85) 100%);
+  background: radial-gradient(circle at center, rgba(40, 10, 25, 0.95) 0%, rgba(0, 0, 0, 1) 100%);
 }
 
 .jackpot-content {
@@ -390,17 +390,33 @@
   }
 }
 
-/* Responsive */
+/* Mobile Styles - Keep fullscreen, just adjust sizes */
 @media (max-width: 768px) {
   .jackpot-title {
-    font-size: 4rem;
+    font-size: clamp(3rem, 14vw, 5rem);
   }
 
   .jackpot-subtitle {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
   }
 
-  .jackpot-pennies {
-    font-size: 3rem;
+  .jackpot-pig-img {
+    width: clamp(35px, 12vw, 60px);
+    height: clamp(35px, 12vw, 60px);
+  }
+
+  .circle-1 {
+    width: 150px;
+    height: 150px;
+  }
+
+  .circle-2 {
+    width: 280px;
+    height: 280px;
+  }
+
+  .circle-3 {
+    width: 400px;
+    height: 400px;
   }
 }

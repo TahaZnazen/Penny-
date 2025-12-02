@@ -2,20 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import './SlotGame.css';
 import { sounds, preloadSounds, unlockAudio } from '../../utils/sounds';
 import { completeSpin } from '../../services/gameApi';
-
-// Define symbols with images and weights (higher weight = more common)
-// IMPORTANT: Order must match server's SYMBOLS array in spin/index.ts
-const SYMBOLS = [
-  { id: 'penny', src: '/imgs/penny.png', alt: 'Penny', weight: 5 },
-  { id: 'pig', src: '/imgs/pig.png', alt: 'pig', weight: 5 },
-  { id: 'ass', src: '/imgs/ass.png', alt: 'ass', weight: 12 },
-  { id: 'cool', src: '/imgs/cool.png', alt: 'cool', weight: 12 },
-  { id: 'pepe', src: '/imgs/pepe.png', alt: 'pepe', weight: 12 },
-  { id: 'spit', src: '/imgs/spit.png', alt: 'spit', weight: 12 },
-  { id: 'trump', src: '/imgs/trump.png', alt: 'trump', weight: 12 },
-  { id: 'viking', src: '/imgs/viking.png', alt: 'viking', weight: 12 },
-  { id: 'cill', src: '/imgs/chill.png', alt: 'cill', weight: 12 },
-];
+import { SYMBOLS } from '../../config/gameConfig';
 
 // Map symbol ID to index for quick lookup
 const SYMBOL_ID_TO_INDEX = {};
@@ -39,6 +26,15 @@ const getWeightedRandomSymbol = () => {
   return SYMBOLS[0]; // Fallback
 };
 
+// Preload all symbol images into browser cache
+const preloadImages = () => {
+  SYMBOLS.forEach(symbol => {
+    const img = new Image();
+    img.src = symbol.src;
+  });
+  console.log('[SlotGame] Preloading', SYMBOLS.length, 'symbol images');
+};
+
 /**
  * SlotGame Component
  * @param {boolean} autoStart - Auto-start the spin when mounted
@@ -59,10 +55,11 @@ const SlotGame = ({ autoStart = false, gameCode, onPennyWin, onPigJackpot, onLos
   const hasStarted = useRef(false); // Track if spin already started
   const serverResult = useRef(null); // Store server result for after animation
 
-  // Initialize reel refs and preload sounds
+  // Initialize reel refs, preload sounds and images
   useEffect(() => {
     reelRefs.current = reelRefs.current.slice(0, REEL_COUNT);
     preloadSounds();
+    preloadImages();
   }, []);
 
   // Generate reels with specific final symbols at position 8

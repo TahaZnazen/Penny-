@@ -1,6 +1,6 @@
 // Supabase Edge Function: /spin
 // Handles game code validation and spin result calculation
-// Deploy: supabase functions deploy spin
+// Deploy: npx supabase functions deploy spin
 //
 // NOTE: IDE errors are expected - this runs in Deno (Supabase Edge Runtime)
 // The code works correctly when deployed to Supabase
@@ -20,24 +20,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Your actual symbols (must match frontend)
-const SYMBOLS = ['penny', 'pig', 'ass', 'cool', 'pepe', 'spit', 'trump', 'viking', 'cill']
+// ╔═══════════════════════════════════════════════════════════════════════════╗
+// ║                        GAME CONFIGURATION                                  ║
+// ║  Change these values to adjust game behavior.                              ║
+// ║  After changes, redeploy: npx supabase functions deploy spin               ║
+// ╚═══════════════════════════════════════════════════════════════════════════╝
+
+// --- SYMBOLS (must match frontend src/config/gameConfig.js) ---
+const SYMBOLS = ['penny', 'pig', 's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9']
 const NUM_REELS = 5
+const PENNY_INDEX = 0  // 'penny' - for penny win (5 pennies)
+const PIG_INDEX = 1    // 'pig' - for jackpot (5 pigs)
 
-// Winning symbol indices (IMPORTANT: these determine what symbols show for wins)
-const PENNY_INDEX = 0  // 'penny' at index 0 - for penny win (5 pennies)
-const PIG_INDEX = 1    // 'pig' at index 1 - for jackpot (5 pigs)
+// --- WIN PROBABILITIES ---
+// Testing values: 0.33 / 0.66 (33% each)
+// Production values: 0.01 / 0.11 (1% jackpot, 10% penny)
+const JACKPOT_PROBABILITY = 0.33     // Chance for jackpot (5 pigs)
+const PENNY_WIN_PROBABILITY = 0.66   // Cumulative: jackpot + penny chance
 
-// Win probabilities (adjust as needed)
-// For testing: 33% jackpot, 33% penny, 33% lose
-// For production: use 0.01 and 0.11
-const JACKPOT_PROBABILITY = 0.33  // 0-33% = Jackpot
-const PENNY_WIN_PROBABILITY = 0.66 // 33-66% = Penny (must be JACKPOT + desired penny %)
+// --- PRIZE POOL (per cycle) ---
+const RESET_CYCLE_HOURS = 5          // Hours between prize resets
+const JACKPOTS_PER_CYCLE = 2         // Jackpots available per cycle
+const PENNY_WINS_PER_CYCLE = 3       // Penny wins available per cycle
 
-// Auto-reset configuration
-const RESET_CYCLE_HOURS = 5        // Reset every 5 hours
-const JACKPOTS_PER_CYCLE = 2       // 2 jackpots available per cycle
-const PENNY_WINS_PER_CYCLE = 3     // 3 penny wins available per cycle
+// ═══════════════════════════════════════════════════════════════════════════
 
 serve(async (req:any) => {
   // Handle CORS preflight

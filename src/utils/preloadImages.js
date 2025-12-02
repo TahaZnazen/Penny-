@@ -8,8 +8,8 @@
 // Critical images to preload
 const PRELOAD_IMAGES = [
   // Backgrounds
-  '/textures/game2.png',
-  '/textures/game2Mobile.jpeg',
+  '/textures/game2.PNG',
+  '/textures/game2Mobile.png',
   '/textures/gamelost.jpeg',
   '/textures/mobileLost.jpeg',
 

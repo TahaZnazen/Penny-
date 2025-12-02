@@ -1,8 +1,9 @@
 import './WinPennyScreen.css';
+import { getPennyWinText, getShareText } from '../../config/gameConfig';
 
 const WinPennyScreen = ({ show }) => {
   const handleShareToX = () => {
-    const text = `I just won 1 SOL on @PennySOLL ! 5 Pennies in a row! Try your luck:`;
+    const text = getShareText.penny();
     const url = 'https://Solpenny.com';
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(twitterUrl, '_blank', 'width=550,height=420');
@@ -10,7 +11,7 @@ const WinPennyScreen = ({ show }) => {
 
   if (!show) return null;
 
-  return ( 
+  return (
     <div className="penny-win-overlay">
       <div className="penny-win-content">
         {/* Animated background circles */}
@@ -34,7 +35,7 @@ const WinPennyScreen = ({ show }) => {
 
           {/* Reward info */}
           <div className="penny-reward-info">
-            <div className="penny-reward-amount">You win 1 SOL (the value of one Penny)</div>
+            <div className="penny-reward-amount">{getPennyWinText()}</div>
             <div className="penny-instruction">Contact Penny bot on Telegram to receive your reward</div>
             <button className="flex-win-btn penny-share-btn" onClick={handleShareToX}>
               <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">

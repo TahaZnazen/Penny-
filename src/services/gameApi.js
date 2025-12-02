@@ -5,6 +5,8 @@
  * In development mode, provides mock responses for testing.
  */
 
+import { SYMBOL_IDS, DEV_PROBABILITIES } from '../config/gameConfig';
+
 // Configuration - Replace with your Supabase details
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -102,38 +104,33 @@ export async function startSpin(gameCode) {
  * @returns {Promise<{result: 'won_jackpot'|'won_penny'|'lost', reels: number[], symbols: string[], error?: string}>}
  */
 export async function completeSpin(gameCode) {
-  // Must match server's SYMBOLS array in spin/index.ts
-  const SYMBOLS = ['penny', 'pig', 'ass', 'cool', 'pepe', 'spit', 'trump', 'viking', 'cill'];
   const NUM_REELS = 5;
+  const PENNY_INDEX = 0; // 'penny'
+  const PIG_INDEX = 1;   // 'pig'
 
-  // DEV MODE: Random result with configurable odds
+  // DEV MODE: Random result using config probabilities
   if (DEV_MODE) {
     console.log('[GameAPI] DEV MODE: Completing spin for code:', gameCode);
 
-    // Simulated probabilities
     const random = Math.random();
     let result;
     let reels;
 
-    const PENNY_INDEX = 0; // 'penny'
-    const PIG_INDEX = 1;   // 'pig'
+    // Use probabilities from config
+    const jackpotThreshold = DEV_PROBABILITIES.JACKPOT;
+    const pennyThreshold = jackpotThreshold + DEV_PROBABILITIES.PENNY_WIN;
 
-    // 5% jackpot chance in dev mode (all 5 PIGS)
-    if (random < 0.05) {
+    if (random < jackpotThreshold) {
       result = 'won_jackpot';
-      reels = Array(NUM_REELS).fill(PIG_INDEX); // 🐷🐷🐷🐷🐷
-    }
-    // 15% penny win chance in dev mode (all 5 PENNIES)
-    else if (random < 0.20) {
+      reels = Array(NUM_REELS).fill(PIG_INDEX);
+    } else if (random < pennyThreshold) {
       result = 'won_penny';
-      reels = Array(NUM_REELS).fill(PENNY_INDEX); // 💰💰💰💰💰
-    }
-    // 80% lose
-    else {
+      reels = Array(NUM_REELS).fill(PENNY_INDEX);
+    } else {
       result = 'lost';
       do {
-        reels = Array(NUM_REELS).fill(0).map(() => Math.floor(Math.random() * SYMBOLS.length));
-      } while (reels.every(r => r === reels[0])); // Ensure not all same
+        reels = Array(NUM_REELS).fill(0).map(() => Math.floor(Math.random() * SYMBOL_IDS.length));
+      } while (reels.every(r => r === reels[0]));
     }
 
     // Simulate network delay
@@ -144,7 +141,7 @@ export async function completeSpin(gameCode) {
     return {
       result,
       reels,
-      symbols: reels.map(r => SYMBOLS[r])
+      symbols: reels.map(r => SYMBOL_IDS[r])
     };
   }
 
@@ -157,7 +154,7 @@ export async function completeSpin(gameCode) {
     return {
       result: 'lost',
       reels: [0, 1, 2, 3, 4],
-      symbols: SYMBOLS.slice(0, NUM_REELS),
+      symbols: SYMBOL_IDS.slice(0, NUM_REELS),
       error: error.message
     };
   }

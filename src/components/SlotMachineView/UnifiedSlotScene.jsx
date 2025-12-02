@@ -2,7 +2,7 @@ import React from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Float, Html } from '@react-three/drei';
 import { PiggyBank } from '../PiggyBank';
-import { Model } from '../SlotMachineModel';
+import { Model } from '../SlotMachineModel2';
 import TVScreenInGap from '../TVScreenInGap/TVScreenInGap';
 import BackgroundPlane from './BackgroundPlane';
 import BottomClouds from './BottomClouds';
@@ -30,14 +30,22 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
 
   // Transition animation state
   const [isTransitioning, setIsTransitioning] = React.useState(false);
-  const transitionStartTime = React.useRef(0);
-  const TRANSITION_DURATION = 1.5; // seconds
+  const [showSlotMachine, setShowSlotMachine] = React.useState(false);
+  const slotPositionY = React.useRef(10); // Start off-screen
+  const velocityY = React.useRef(0); // Velocity for spring physics
+
+  // Set initial position when group mounts to avoid flash
+  React.useLayoutEffect(() => {
+    if (groupRef.current) {
+      groupRef.current.position.y = slotPositionY.current;
+    }
+  }, [isTransitioning, showSlotMachine]);
 
   // Drag-to-rotate state for piggy bank
   const [isDragging, setIsDragging] = React.useState(false);
   const [piggyRotation, setPiggyRotation] = React.useState(0);
   const lastX = React.useRef(0);
-  const { gl, clock } = useThree();
+  const { gl } = useThree();
 
   // Handle drag rotation for piggy
   React.useEffect(() => {
@@ -73,45 +81,52 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
     };
   }, [phase, isDragging, gl]);
 
-  // Animation for transition and slot machine
-  useFrame((state) => {
-    const currentTime = state.clock.elapsedTime;
+  // Animation for slot machine position using spring physics
+  useFrame(() => {
+    if (!groupRef.current) return;
 
-    // TRANSITION: Slot machine drops from top
-    if (isTransitioning && groupRef.current) {
-      const elapsed = currentTime - transitionStartTime.current;
-      const progress = Math.min(elapsed / TRANSITION_DURATION, 1);
+    // Target position based on state
+    const targetY = showSlotMachine ? 0 : 10;
 
-      // Ease out bounce for slot machine drop
-      const easeOutBounce = (t) => {
-        if (t < 1 / 2.75) {
-          return 7.5625 * t * t;
-        } else if (t < 2 / 2.75) {
-          return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
-        } else if (t < 2.5 / 2.75) {
-          return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
-        } else {
-          return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
-        }
-      };
+    if (isTransitioning) {
+      // Spring physics parameters
+      const stiffness = 120; // How strong the spring pulls (higher = faster)
+      const damping = 14;    // How much friction/resistance (higher = less bounce)
+      const mass = 1;        // Mass of the object
+      const dt = 1 / 60;     // Fixed timestep for consistent physics
 
-      // Slot machine drops from top (y=10) to final position (y=0)
-      const slotY = 10 - 10 * easeOutBounce(progress);
-      groupRef.current.position.set(0, slotY, 0);
+      // Calculate spring force: F = -k * displacement
+      const displacement = slotPositionY.current - targetY;
+      const springForce = -stiffness * displacement;
 
-      // Transition complete
-      if (progress >= 1) {
+      // Calculate damping force: F = -c * velocity
+      const dampingForce = -damping * velocityY.current;
+
+      // Total acceleration: a = F / m
+      const acceleration = (springForce + dampingForce) / mass;
+
+      // Update velocity and position (semi-implicit Euler)
+      velocityY.current += acceleration * dt;
+      slotPositionY.current += velocityY.current * dt;
+
+      // Check if animation is settled (position close to target AND velocity near zero)
+      const isSettled = Math.abs(displacement) < 0.01 && Math.abs(velocityY.current) < 0.01;
+
+      if (isSettled) {
+        slotPositionY.current = targetY;
+        velocityY.current = 0;
         setIsTransitioning(false);
         if (onPhaseChange) {
           onPhaseChange('slot-machine');
         }
       }
+    } else if (phase === 'slot-machine') {
+      // Keep at final position
+      slotPositionY.current = 0;
     }
 
-    // Normal slot machine phase (after transition)
-    if (phase === 'slot-machine' && !isTransitioning && groupRef.current) {
-      groupRef.current.position.set(0, 0, 0);
-    }
+    // Apply position
+    groupRef.current.position.y = slotPositionY.current;
   });
 
   // Handle piggy bank broken state
@@ -122,7 +137,7 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
   // Handle coin click - start transition animation
   const handleCoinClick = () => {
     console.log('Coin clicked! Starting transition...');
-    transitionStartTime.current = clock.elapsedTime;
+    setShowSlotMachine(true);
     setIsTransitioning(true);
   };
 
@@ -166,6 +181,16 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
         shadow-camera-bottom={-10}
       />
       <pointLight position={[-10, -10, -6]} intensity={1} />
+
+      {/* Front light for slot machine */}
+      <spotLight
+        position={[0, 2, 6]}
+        angle={0.5}
+        penumbra={0.5}
+        intensity={1.5}
+        color="#ffffff"
+        target-position={[0, 0, 2.5]}
+      />
 
       {/* Ground shadow plane */}
       <mesh
@@ -228,40 +253,17 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
         </>
       )}
 
-      {/* TRANSITION: Slot machine dropping from top */}
-      {isTransitioning && (
-        <group ref={groupRef} position={[0, 10, 0]}>
+      {/* SLOT MACHINE: Shown during transition (dropping) and slot-machine phase */}
+      {(isTransitioning || (phase === 'slot-machine' && !pennyWinTriggered)) && (
+        <group ref={groupRef}>
           <Model
             ref={modelRef}
             position={[0, 0, 2.5]}
-            scale={1}
+            scale={1.45}
             rotation={[0.2, 0, 0]}
             castShadow
             receiveShadow
           />
-          {showScreen && (
-            <TVScreenInGap
-              onPennyWin={handlePennyWin}
-              onPigJackpot={handlePigJackpot}
-            />
-          )}
-        </group>
-      )}
-
-      {/* SLOT MACHINE PHASE: Show slot machine (after transition) */}
-      {phase === 'slot-machine' && !isTransitioning && !pennyWinTriggered && (
-        <group ref={groupRef} position={[0, 0, 0]}>
-          {/* Slot Machine Model */}
-          <Model
-            ref={modelRef}
-            position={[0, 0, 2.5]}
-            scale={1}
-            rotation={[0.2, 0, 0]}
-            castShadow
-            receiveShadow
-          />
-
-          {/* TV Screen with slot game */}
           {showScreen && (
             <TVScreenInGap
               onPennyWin={handlePennyWin}

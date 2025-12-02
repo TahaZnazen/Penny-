@@ -7,7 +7,16 @@
       "Bash(cat:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(dir:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(del \"c:\\Users\\XMP\\Desktop\\work\\r3f-objects-explode\\nul\")",
+      "Bash(npx gltfjsx@6.5.3:*)",
+      "Bash(findstr:*)",
+      "Bash(timeout 10 npm run dev:*)",
+      "Bash(del \"c:\\Users\\XMP\\Desktop\\work\\r3f-objects-explode\\src\\components\\SlotMachineModel.jsx\")",
+      "Bash(find:*)",
+      "Bash(sort:*)"
     ],
     "deny": [],
     "ask": []

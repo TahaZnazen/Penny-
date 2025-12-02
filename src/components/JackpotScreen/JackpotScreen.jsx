@@ -1,8 +1,9 @@
 import './JackpotScreen.css';
+import { getJackpotText, getShareText } from '../../config/gameConfig';
 
 const JackpotScreen = ({ show }) => {
   const handleShareToX = () => {
-    const text = `I just hit the JACKPOT on @PennySOLL ! Won 10% of the creator-fees wallet! Try your luck:`;
+    const text = getShareText.jackpot();
     const url = 'https://Solpenny.com';
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     window.open(twitterUrl, '_blank', 'width=550,height=420');
@@ -34,7 +35,7 @@ const JackpotScreen = ({ show }) => {
 
           {/* Reward info */}
           <div className="jackpot-reward-info">
-            <div className="jackpot-reward-amount">You win 10% of the creator-fees wallet!</div>
+            <div className="jackpot-reward-amount">{getJackpotText()}</div>
             <div className="jackpot-instruction">Contact Penny bot on Telegram to receive your reward</div>
             <button className="flex-win-btn jackpot-share-btn" onClick={handleShareToX}>
               <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">

@@ -8,7 +8,7 @@
   z-index: 9999999;
   pointer-events: none;
   animation: penny-fade-in 0.5s ease-out;
-  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.85) 100%);
+  background: radial-gradient(circle at center, rgba(20, 10, 5, 0.95) 0%, rgba(0, 0, 0, 1) 100%);
 }
 
 .penny-win-content {
@@ -374,4 +374,35 @@
 @keyframes penny-rays-rotate {
   from { transform: translate(-50%, -50%) rotate(0deg); }
   to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Mobile Styles - Keep fullscreen, just adjust sizes */
+@media (max-width: 768px) {
+  .penny-title {
+    font-size: clamp(3rem, 14vw, 5rem);
+  }
+
+  .penny-subtitle {
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
+  }
+
+  .penny-coin {
+    width: clamp(35px, 12vw, 60px);
+    height: clamp(35px, 12vw, 60px);
+  }
+
+  .penny-circle-1 {
+    width: 150px;
+    height: 150px;
+  }
+
+  .penny-circle-2 {
+    width: 280px;
+    height: 280px;
+  }
+
+  .penny-circle-3 {
+    width: 400px;
+    height: 400px;
+  }
 }
