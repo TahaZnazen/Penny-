@@ -1,26 +1,11 @@
-import { useMemo, useState } from 'react';
 import './JackpotScreen.css';
 
-// Generate a random reward code
-const generateCode = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-};
-
 const JackpotScreen = ({ show }) => {
-  // Generate code once when component mounts with show=true
-  const rewardCode = useMemo(() => generateCode(), [show]);
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(rewardCode).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+  const handleShareToX = () => {
+    const text = `I just hit the JACKPOT on @PennySOLL ! Won 10% of the creator-fees wallet! Try your luck:`;
+    const url = 'https://Solpenny.com';
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, '_blank', 'width=550,height=420');
   };
 
   if (!show) return null;
@@ -50,10 +35,13 @@ const JackpotScreen = ({ show }) => {
           {/* Reward info */}
           <div className="jackpot-reward-info">
             <div className="jackpot-reward-amount">You win 10% of the creator-fees wallet!</div>
-            <div className="jackpot-instruction">Submit this code to Penny Telegram to receive your rewards</div>
-            <div className="jackpot-code" onClick={handleCopyCode} style={{ cursor: 'pointer', pointerEvents: 'auto' }}>
-              {copied ? 'COPIED!' : rewardCode}
-            </div>
+            <div className="jackpot-instruction">Contact Penny bot on Telegram to receive your reward</div>
+            <button className="flex-win-btn jackpot-share-btn" onClick={handleShareToX}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              Flex your win
+            </button>
           </div>
         </div>
 

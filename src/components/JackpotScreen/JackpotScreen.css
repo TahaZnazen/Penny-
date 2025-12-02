@@ -169,6 +169,42 @@
   }
 }
 
+/* Flex Your Win Button - Jackpot (Pink) */
+.jackpot-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1.5rem;
+  padding: 12px 28px;
+  background: #ff69b4;
+  color: #fff;
+  border: 2px solid #ff69b4;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 20px rgba(255, 105, 180, 0.4);
+}
+
+.jackpot-share-btn:hover {
+  background: #ff1493;
+  border-color: #ff1493;
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(255, 105, 180, 0.8);
+}
+
+.jackpot-share-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.jackpot-share-btn:hover svg {
+  transform: rotate(-10deg) scale(1.1);
+}
+
 /* Particles */
 .particles {
   position: absolute;
