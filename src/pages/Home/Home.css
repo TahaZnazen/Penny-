@@ -447,6 +447,21 @@
   background: linear-gradient(135deg, #ff85c1, #ff69b4);
 }
 
+.btn-whitepaper {
+  background: transparent;
+  border: 2px solid #ff69b4;
+  color: #ff69b4;
+  text-shadow: none;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.2);
+}
+
+.btn-whitepaper:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 25px rgba(255, 105, 180, 0.4);
+  background: rgba(255, 105, 180, 0.15);
+}
+
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .click-message {

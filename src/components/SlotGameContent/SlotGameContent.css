@@ -289,7 +289,7 @@ content: '';
 
 .slot-game-content.mobile.start-screen {
   /* background-image: url('/textures/game2Mobile.png'); */
-  margin-top: 4rem;
+  margin-top: -2rem;
 }
 
 .slot-game-content.mobile.lost-screen {

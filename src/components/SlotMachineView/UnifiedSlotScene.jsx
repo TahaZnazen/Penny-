@@ -221,6 +221,36 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
             </Float>
           </group>
 
+          {/* Instruction to break piggy bank */}
+          {!piggyBroken && (
+            <Html center position={[0, 0.8, 0]} style={{ pointerEvents: 'none' }}>
+              <div style={{
+                background: 'rgba(0, 0, 0, 0.7)',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                border: '2px solid #ffd700',
+                animation: 'pulse 1.5s ease-in-out infinite',
+              }}>
+                <p style={{
+                  color: '#ffd700',
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  margin: 0,
+                  textShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+                  whiteSpace: 'nowrap',
+                }}>
+                    Break the Piggy Bank!  
+                </p>
+              </div>
+              <style>{`
+                @keyframes pulse {
+                  0%, 100% { transform: scale(1); opacity: 1; }
+                  50% { transform: scale(1.05); opacity: 0.9; }
+                }
+              `}</style>
+            </Html>
+          )}
+
           {/* Instruction to click penny after piggy breaks */}
           {piggyBroken && (
             <Html center position={[0, 1.5, 0]} style={{ pointerEvents: 'none' }}>

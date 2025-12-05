@@ -1,9 +1,11 @@
 import React from 'react';
 import { Canvas } from '@react-three/fiber';
+import { FaTelegram } from 'react-icons/fa';
 import JackpotScreen from '../JackpotScreen/JackpotScreen';
 import WinPennyScreen from '../WinPennyScreen/WinPennyScreen';
 import SlotGameContent, { useSlotGameState } from '../SlotGameContent';
 import UnifiedSlotScene from './UnifiedSlotScene';
+import { PRIZES } from '../../config/gameConfig';
 import './SlotMachineView.css';
 
 // Hook to detect mobile
@@ -28,6 +30,7 @@ const SlotMachineView = () => {
   const [showJackpotScreen, setShowJackpotScreen] = React.useState(false);
   const [showPennyWinScreen, setShowPennyWinScreen] = React.useState(false);
   const [phase, setPhase] = React.useState('piggy'); // 'piggy' | 'slot-machine'
+  const [prizeInfoOpen, setPrizeInfoOpen] = React.useState(false);
   const isMobile = useIsMobile();
 
   // Shared game state for mobile (desktop uses TVScreenInGap's own state)
@@ -59,6 +62,74 @@ const SlotMachineView = () => {
 
   return (
     <div className="slot-machine-view">
+      {/* Prize Info Section - Top Right (Desktop) / Bottom Right Collapsible (Mobile) */}
+      {isMobile && !prizeInfoOpen ? (
+        /* Mobile: Collapsed state - just show ? button */
+        <button
+          className="prize-info-toggle"
+          onClick={() => setPrizeInfoOpen(true)}
+          aria-label="Show prize info"
+        >
+          ?
+        </button>
+      ) : (
+        /* Desktop: Always visible / Mobile: Expanded state */
+        <div className={`prize-info-section ${isMobile ? 'mobile-expanded' : ''}`}>
+          {isMobile && (
+            <button
+              className="prize-info-close"
+              onClick={() => setPrizeInfoOpen(false)}
+              aria-label="Close prize info"
+            >
+              ✕
+            </button>
+          )}
+          <div className="prize-info-header">
+            <div className="prize-info-title">Win Prizes</div>
+            <div className="prize-info-alert">
+              <span className="alert-icon">&#9432;</span>
+              <div className="prize-info-popover">
+                <p>These prizes are for <strong>pre-launch giveaway</strong> purposes only.</p>
+                <p>For official prize details after launch, please check our whitepaper:</p>
+                <a
+                  href="https://penny-1.gitbook.io/penny-docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="whitepaper-link"
+                >
+                  View Whitepaper
+                </a>
+              </div>
+            </div>
+          </div>
+          <div className="prize-info-row">
+            <img src="/imgs/penny.png" alt="Penny" className="prize-icon" />
+            <span className="prize-label">1 Penny</span>
+            <span className="prize-value">{PRIZES.PENNY_WIN_AMOUNT} {PRIZES.PENNY_WIN_UNIT}</span>
+          </div>
+          <div className="prize-info-row jackpot-row">
+            <img src="/imgs/pig.png" alt="Pig" className="prize-icon" />
+            <span className="prize-label">Jackpot</span>
+            <span className="prize-value jackpot-value">{PRIZES.JACKPOT_AMOUNT} {PRIZES.JACKPOT_UNIT}</span>
+          </div>
+
+          <div className="how-to-play">
+            <span className="how-to-play-title">How to Play</span>
+            <p className="how-to-play-text">Get your game code from our Telegram bot to start spinning!</p>
+          </div>
+
+          <a
+            href="https://web.telegram.org/k/#@penny_slot_bot"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="get-code-btn"
+          >
+            <FaTelegram className="telegram-icon" />
+            Get Your Code
+          </a>
+        </div>
+      )}
+
       {isMobile ? (
         /* Mobile: 2D game only, no 3D Canvas */
         <SlotGameContent

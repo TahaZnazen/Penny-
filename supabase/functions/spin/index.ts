@@ -33,10 +33,10 @@ const PENNY_INDEX = 0  // 'penny' - for penny win (5 pennies)
 const PIG_INDEX = 1    // 'pig' - for jackpot (5 pigs)
 
 // --- WIN PROBABILITIES ---
-// Testing values: 0.33 / 0.66 (33% each)
-// Production values: 0.01 / 0.11 (1% jackpot, 10% penny)
-const JACKPOT_PROBABILITY = 0.33     // Chance for jackpot (5 pigs)
-const PENNY_WIN_PROBABILITY = 0.66   // Cumulative: jackpot + penny chance
+// PRODUCTION VALUES (for launch):
+// Jackpot: 5% | Penny Win: 10% | Loss: 85%
+const JACKPOT_PROBABILITY = 0.05     // 5% chance for jackpot (5 pigs) → 0.3 SOL
+const PENNY_WIN_PROBABILITY = 0.15   // Cumulative: 5% + 10% = 15% (penny win → 0.1 SOL)
 
 // --- PRIZE POOL (per cycle) ---
 const RESET_CYCLE_HOURS = 5          // Hours between prize resets

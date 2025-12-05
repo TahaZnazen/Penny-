@@ -14,11 +14,12 @@
 
 export const PRIZES = {
   // Penny win reward (5 pennies in a row)
-  PENNY_WIN_AMOUNT: 1,           // Amount in SOL
+  PENNY_WIN_AMOUNT: 0.1,         // Amount in SOL
   PENNY_WIN_UNIT: 'SOL',         // Currency unit
 
   // Jackpot reward (5 pigs in a row)
-  JACKPOT_PERCENTAGE: 10,        // Percentage of creator-fees wallet
+  JACKPOT_AMOUNT: 0.3,           // Amount in SOL
+  JACKPOT_UNIT: 'SOL',           // Currency unit
 };
 
 // ===========================================
@@ -28,8 +29,8 @@ export const PRIZES = {
 
 export const DEV_PROBABILITIES = {
   JACKPOT: 0.05,    // 5% chance for jackpot (5 pigs)
-  PENNY_WIN: 0.15,  // 15% chance for penny win (5 pennies)
-  // Remaining % = loss
+  PENNY_WIN: 0.10,  // 10% chance for penny win (5 pennies)
+  // Remaining 85% = loss
 };
 
 // ===========================================
@@ -41,13 +42,13 @@ export const getPennyWinText = () => {
 };
 
 export const getJackpotText = () => {
-  return `You win ${PRIZES.JACKPOT_PERCENTAGE}% of the creator-fees wallet!`;
+  return `You win ${PRIZES.JACKPOT_AMOUNT} ${PRIZES.JACKPOT_UNIT}!`;
 };
 
 // For Twitter sharing
 export const getShareText = {
   penny: () => `I just won ${PRIZES.PENNY_WIN_AMOUNT} ${PRIZES.PENNY_WIN_UNIT} on @PennySOLL! 5 Pennies in a row! Try your luck:`,
-  jackpot: () => `I just hit the JACKPOT on @PennySOLL! Won ${PRIZES.JACKPOT_PERCENTAGE}% of the creator-fees wallet! Try your luck:`,
+  jackpot: () => `I just hit the JACKPOT on @PennySOLL! Won ${PRIZES.JACKPOT_AMOUNT} ${PRIZES.JACKPOT_UNIT}! Try your luck:`,
 };
 
 // ===========================================

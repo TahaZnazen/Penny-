@@ -9,20 +9,11 @@
 const PRELOAD_IMAGES = [
   // Backgrounds
   '/textures/game2.PNG',
-  '/textures/game2Mobile.png',
-  '/textures/gamelost.jpeg',
+   '/textures/gamelost.jpeg',
   '/textures/mobileLost.jpeg',
 
-  // Symbol images
-  '/imgs/penny.png',
-  '/imgs/pig.png',
-  '/imgs/ass.png',
-  '/imgs/cool.png',
-  '/imgs/pepe.png',
-  '/imgs/spit.png',
-  '/imgs/trump.png',
-  '/imgs/viking.png',
-  '/imgs/chill.png',
+ 
+ 
 ];
 
 // Track loading state

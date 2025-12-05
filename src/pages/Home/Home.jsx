@@ -124,6 +124,13 @@ function Home() {
               <span> Try Your Luck with Penny  </span>
             </button>
 
+            <button
+              className="btn btn-whitepaper"
+              onClick={() => window.open("https://penny-1.gitbook.io/penny-docs", "_blank")}
+            >
+              <span>  Whitepaper</span>
+            </button>
+
             <div className="social-buttons">
               <button
                 className="btn btn-icon btn-telegram"
