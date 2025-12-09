@@ -3,8 +3,9 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 // Static configuration - moved outside component to prevent re-renders
+// Optimized for performance - heavily reduced for low-end PCs
 const PARTICLE_CONFIG = {
-  count: 80,
+  count: 15,           // was 80 → 40 → 15
   scale: 0.08,
   scaleVariation: 0.06,
   opacity: 1,

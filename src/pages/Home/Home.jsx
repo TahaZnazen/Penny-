@@ -61,7 +61,7 @@ function Home() {
           className="btn btn-icon btn-telegram"
           onClick={() =>
             window.open(
-              "https://web.telegram.org/k/#@PennySOLLL",
+              "https://t.me/PennySOLLL",
               "_blank"
             )
           }
@@ -136,7 +136,7 @@ function Home() {
                 className="btn btn-icon btn-telegram"
                 onClick={() =>
                   window.open(
-                    "https://web.telegram.org/k/#@PennySOLLL",
+                    "https://t.me/PennySOLLL",
                     "_blank"
                   )
                 }

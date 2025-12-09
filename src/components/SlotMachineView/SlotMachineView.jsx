@@ -5,7 +5,6 @@ import JackpotScreen from '../JackpotScreen/JackpotScreen';
 import WinPennyScreen from '../WinPennyScreen/WinPennyScreen';
 import SlotGameContent, { useSlotGameState } from '../SlotGameContent';
 import UnifiedSlotScene from './UnifiedSlotScene';
-import { PRIZES } from '../../config/gameConfig';
 import './SlotMachineView.css';
 
 // Hook to detect mobile
@@ -84,33 +83,9 @@ const SlotMachineView = () => {
               ✕
             </button>
           )}
-          <div className="prize-info-header">
-            <div className="prize-info-title">Win Prizes</div>
-            <div className="prize-info-alert">
-              <span className="alert-icon">&#9432;</span>
-              <div className="prize-info-popover">
-                <p>These prizes are for <strong>pre-launch giveaway</strong> purposes only.</p>
-                <p>For official prize details after launch, please check our whitepaper:</p>
-                <a
-                  href="https://penny-1.gitbook.io/penny-docs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="whitepaper-link"
-                >
-                  View Whitepaper
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="prize-info-row">
-            <img src="/imgs/penny.png" alt="Penny" className="prize-icon" />
-            <span className="prize-label">1 Penny</span>
-            <span className="prize-value">{PRIZES.PENNY_WIN_AMOUNT} {PRIZES.PENNY_WIN_UNIT}</span>
-          </div>
-          <div className="prize-info-row jackpot-row">
-            <img src="/imgs/pig.png" alt="Pig" className="prize-icon" />
-            <span className="prize-label">Jackpot</span>
-            <span className="prize-value jackpot-value">{PRIZES.JACKPOT_AMOUNT} {PRIZES.JACKPOT_UNIT}</span>
+          <div className="beta-over-banner">
+            <span className="beta-over-title">Beta is Over!</span>
+            <p className="beta-over-text">Keep playing for fun until the official launch.</p>
           </div>
 
           <div className="how-to-play">
@@ -119,7 +94,7 @@ const SlotMachineView = () => {
           </div>
 
           <a
-            href="https://web.telegram.org/k/#@penny_slot_bot"
+            href="https://t.me/penny_slot_bot"
             target="_blank"
             rel="noopener noreferrer"
             className="get-code-btn"

@@ -2,13 +2,14 @@ import React from 'react';
 import { Cloud } from '@react-three/drei';
 
 // Static configuration - moved outside component to prevent re-renders
+// Optimized for performance - heavily reduced for low-end PCs
 const CLOUD_CONFIG = {
-  count: 18,
+  count: 4,            // was 18 → 8 → 4
   radius: 5.0,
   yPosition: -24.1,
   yRange: 3.9,
   zPosition: -31.0,
-  segments: 40,
+  segments: 10,        // was 40 → 20 → 10
   boundsX: 8.0,
   boundsY: 3.0,
   boundsZ: 9.0,

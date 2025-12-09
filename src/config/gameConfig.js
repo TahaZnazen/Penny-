@@ -14,11 +14,11 @@
 
 export const PRIZES = {
   // Penny win reward (5 pennies in a row)
-  PENNY_WIN_AMOUNT: 0.1,         // Amount in SOL
+  PENNY_WIN_AMOUNT: 0,           // Beta over - no prizes
   PENNY_WIN_UNIT: 'SOL',         // Currency unit
 
   // Jackpot reward (5 pigs in a row)
-  JACKPOT_AMOUNT: 0.3,           // Amount in SOL
+  JACKPOT_AMOUNT: 0,             // Beta over - no prizes
   JACKPOT_UNIT: 'SOL',           // Currency unit
 };
 

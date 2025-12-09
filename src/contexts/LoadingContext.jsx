@@ -7,17 +7,18 @@ const LoadingContext = createContext({
   assetsReady: false,
 });
 
-// All assets to preload
+// All assets to preload - optimized for faster initial load
+// Slot machine model is loaded lazily when needed (not preloaded)
 const PRELOAD_MODELS = [
   '/models/piggybank.glb',
-  '/models/slotMachine2.glb',  // New slot machine model
-  // '/models/slotmachine.glb', // Old model (keeping for reference)
+  // '/models/slotMachine2.glb',  // Lazy loaded - 41MB too heavy for preload
 ];
 
 const PRELOAD_TEXTURES = [
-  '/textures/bg.png',
-  '/textures/bg0.png',
-   '/textures/game2.PNG',
+  // Heavy textures removed from preload - loaded on demand
+  // '/textures/bg.png',      // 7.2MB
+  // '/textures/bg0.png',     // 5MB
+  // '/textures/game2.PNG',   // 9.1MB
 ];
 
 const PRELOAD_IMAGES = [

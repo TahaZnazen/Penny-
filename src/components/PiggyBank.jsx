@@ -293,23 +293,7 @@ export const PiggyBank = (props) => {
 
   return (
     <group {...props} ref={groupRef} dispose={null}>
-      {/* Golden glow - increases as more pieces break */}
-      <pointLight
-        position={[0, 0, 0]}
-        intensity={glowIntensity * 15}
-        color="#ffd700"
-        distance={10}
-      />
-
-      {/* Additional ambient golden glow */}
-      {glowIntensity > 0.3 && (
-        <pointLight
-          position={[0, 0, 2]}
-          intensity={glowIntensity * 8}
-          color="#ffaa00"
-          distance={6}
-        />
-      )}
+      {/* Golden glow removed for performance */}
 
       {/* All piggy bank pieces */}
       {meshes.map((mesh, i) => (
@@ -424,21 +408,7 @@ const PennyCoin = ({ glowIntensity = 1, position = [0, 0, 0], scale = 1, onClick
         />
       </mesh>
 
-      {/* Left Eye Glow */}
-      <pointLight
-        position={[-0.08, 0, 0.04]}
-        color="#ffff00"
-        intensity={glowIntensity * 2}
-        distance={0.5}
-      />
-
-      {/* Right Eye Glow */}
-      <pointLight
-        position={[0.08, 0, 0.04]}
-        color="#ffff00"
-        intensity={0.1}
-        distance={0.5}
-      />
+      {/* Eye glow removed for performance */}
 
       {/* Glowing aura around the coin */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
@@ -463,29 +433,7 @@ const PennyCoin = ({ glowIntensity = 1, position = [0, 0, 0], scale = 1, onClick
         />
       </mesh>
 
-      {/* Light rays effect */}
-      <pointLight
-        position={[0, 0, 0]}
-        color="#ffff00"
-        intensity={10}
-        distance={5}
-        decay={2}
-      />
-
-      {/* Ambient coin glow */}
-      <pointLight
-        position={[0, 0.2, 0]}
-        color="#ffd700"
-        intensity={10}
-        distance={2}
-      />
-
-      <pointLight
-        position={[0, -0.2, 0]}
-        color="#ffd700"
-        intensity={10}
-        distance={2}
-      />
+      {/* Lights removed for performance - using emissive materials instead */}
 
     
     </group>

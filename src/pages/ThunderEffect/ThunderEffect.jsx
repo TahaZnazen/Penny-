@@ -104,24 +104,24 @@ const LightningBolt = ({ startPos, endPos, active, intensity = 1 }) => {
         />
       </line>
 
-      {/* Point light at strike point */}
+      {/* Point light at strike point - reduced for performance */}
       <pointLight
         position={endPos}
-        intensity={intensity * 150}
+        intensity={intensity * 30}
         color="#a0c4ff"
-        distance={30}
+        distance={15}
         decay={2}
       />
     </group>
   );
 };
 
-// Storm clouds at the top
+// Storm clouds at the top - optimized for performance
 const StormClouds = () => {
   const cloudData = useMemo(() => {
-    return Array.from({ length: 8 }, (_, i) => ({
+    return Array.from({ length: 4 }, (_, i) => ({  // was 8
       position: [
-        (i - 4) * 4 + Math.random() * 2,
+        (i - 2) * 6 + Math.random() * 2,
         8 + Math.random() * 2,
         -5 + Math.random() * 3
       ],
@@ -139,7 +139,7 @@ const StormClouds = () => {
           speed={cloud.speed}
           opacity={cloud.opacity}
           color="#2c3e50"
-          segments={40}
+          segments={15}       // was 40
           bounds={[6, 2, 3]}
           volume={8}
           fade={30}
@@ -316,9 +316,9 @@ const ThunderEffect = ({
   // Desktop: Full 3D thunder experience
   return (
     <div className={`thunder-effect-container ${lightningActive ? 'lightning-flash' : ''}`} onClick={handleClick}>
-      {/* CSS Rain overlay */}
+      {/* CSS Rain overlay - reduced for performance */}
       <div className="rain-container">
-        {[...Array(100)].map((_, i) => (
+        {[...Array(40)].map((_, i) => (
           <div key={i} className="rain-drop" style={{
             left: `${Math.random() * 100}%`,
             animationDuration: `${0.5 + Math.random() * 0.3}s`,

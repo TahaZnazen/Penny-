@@ -233,6 +233,34 @@
   text-shadow: 0 0 10px rgba(255, 105, 180, 0.6);
 }
 
+/* Beta Over Banner */
+.beta-over-banner {
+  text-align: center;
+  padding: 14px;
+  background: rgba(255, 105, 180, 0.15);
+  border: 2px solid rgba(255, 105, 180, 0.5);
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.beta-over-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff69b4;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+}
+
+.beta-over-text {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+}
+
 /* How to Play Section */
 .how-to-play {
   margin-top: 14px;
@@ -428,6 +456,20 @@
 
   .prize-value {
     font-size: 12px;
+  }
+
+  .beta-over-banner {
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+
+  .beta-over-title {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .beta-over-text {
+    font-size: 10px;
   }
 
   .how-to-play {

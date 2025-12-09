@@ -1,6 +1,28 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Float, Html } from '@react-three/drei';
+
+// Loading fallback for slot machine (lazy loaded - 41MB)
+const SlotMachineLoader = () => (
+  <Html center>
+    <div style={{
+      background: 'rgba(0, 0, 0, 0.8)',
+      padding: '20px 40px',
+      borderRadius: '12px',
+      border: '2px solid #ffd700',
+    }}>
+      <p style={{
+        color: '#ffd700',
+        fontSize: '18px',
+        fontWeight: 'bold',
+        margin: 0,
+        whiteSpace: 'nowrap',
+      }}>
+        Loading Slot Machine...
+      </p>
+    </div>
+  </Html>
+);
 import { PiggyBank } from '../PiggyBank';
 import { Model } from '../SlotMachineModel2';
 import TVScreenInGap from '../TVScreenInGap/TVScreenInGap';
@@ -168,43 +190,17 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
 
       {/* Shared Lighting */}
       <ambientLight intensity={0.5} />
+      {/* Simplified lighting - no shadows for performance */}
       <directionalLight
         position={[10, 10, 5]}
-        intensity={1}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-far={50}
-        shadow-camera-left={-10}
-        shadow-camera-right={10}
-        shadow-camera-top={10}
-        shadow-camera-bottom={-10}
+        intensity={1.2}
       />
-      <pointLight position={[-10, -10, -6]} intensity={1} />
+      <pointLight position={[0, 0, 4]} intensity={0.8} />
 
-      {/* Front light for slot machine */}
-      <spotLight
-        position={[0, 2, 6]}
-        angle={0.5}
-        penumbra={0.5}
-        intensity={1.5}
-        color="#ffffff"
-        target-position={[0, 0, 2.5]}
-      />
+      {/* Shadow plane removed for performance */}
 
-      {/* Ground shadow plane */}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 1]}
-        position={[0, -0.8, 0]}
-        receiveShadow
-      >
-        <shadowMaterial opacity={0.2} />
-      </mesh>
-
-      {/* Bottom cloud layer */}
+      {/* Reduced clouds and particles for performance */}
       <BottomClouds />
-
-      {/* Ambient sparkle particles */}
       <AmbientParticles />
 
       {/* PIGGY PHASE: Show piggy bank with drag-to-rotate */}
@@ -284,23 +280,24 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
       )}
 
       {/* SLOT MACHINE: Shown during transition (dropping) and slot-machine phase */}
+      {/* Wrapped in Suspense for lazy loading - model is 41MB */}
       {(isTransitioning || (phase === 'slot-machine' && !pennyWinTriggered)) && (
-        <group ref={groupRef}>
-          <Model
-            ref={modelRef}
-            position={[0, 0, 2.5]}
-            scale={1.45}
-            rotation={[0.2, 0, 0]}
-            castShadow
-            receiveShadow
-          />
-          {showScreen && (
-            <TVScreenInGap
-              onPennyWin={handlePennyWin}
-              onPigJackpot={handlePigJackpot}
+        <Suspense fallback={<SlotMachineLoader />}>
+          <group ref={groupRef}>
+            <Model
+              ref={modelRef}
+              position={[0, 0, 2.5]}
+              scale={1.45}
+              rotation={[0.2, 0, 0]}
             />
-          )}
-        </group>
+            {showScreen && (
+              <TVScreenInGap
+                onPennyWin={handlePennyWin}
+                onPigJackpot={handlePigJackpot}
+              />
+            )}
+          </group>
+        </Suspense>
       )}
 
       {/* Camera Controls - rotation disabled to prevent cloud issues */}
@@ -310,6 +307,7 @@ const UnifiedSlotScene = ({ phase, onPhaseChange, onPennyWin, onPigJackpot }) =>
         enableRotate={false}
         enablePan={false}
       />
+
     </>
   );
 };
