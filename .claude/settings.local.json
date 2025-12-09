@@ -4,7 +4,9 @@
       "Bash(powershell -Command:*)",
       "Bash(npm run build:*)",
       "Bash(dir:*)",
-      "Bash(npx gltfjsx@6.5.3:*)"
+      "Bash(npx gltfjsx@6.5.3:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

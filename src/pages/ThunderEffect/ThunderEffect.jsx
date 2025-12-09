@@ -265,6 +265,15 @@ const ThunderEffect = ({
         // On mobile, show button immediately since no 3D piggy
         if (isMobile) {
           setShowStartButton(true);
+        } else {
+          // Fallback: If 3D animation fails or model doesn't load,
+          // force show button after delay
+          setTimeout(() => {
+            setShowStartButton(prev => {
+              if (!prev) console.log('[ThunderEffect] Force showing start button (timeout)');
+              return true;
+            });
+          }, 2000);
         }
       }
 

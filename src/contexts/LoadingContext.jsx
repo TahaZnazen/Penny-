@@ -67,7 +67,24 @@ export const LoadingProvider = ({ children }) => {
 
     const preloadAll = async () => {
       const allImages = [...PRELOAD_TEXTURES, ...PRELOAD_IMAGES];
-      await Promise.all(allImages.map(preloadImage));
+
+      // Timeout that forces continue after 5 seconds
+      // This prevents app from getting stuck if assets fail to load
+      const timeoutPromise = new Promise(resolve => {
+        setTimeout(() => {
+          console.warn('[LoadingContext] Asset loading timed out, forcing continue');
+          resolve();
+        }, 5000);
+      });
+
+      // Wait for either all images to load OR the timeout
+      await Promise.race([
+        Promise.all(allImages.map(preloadImage)),
+        timeoutPromise
+      ]);
+
+      // Ensure progress shows 100% even on timeout
+      setLoadingProgress(100);
       setAssetsReady(true);
     };
 
